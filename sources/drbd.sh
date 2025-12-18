@@ -4,6 +4,13 @@
 
 # on BOTH compute instances
 
+sudo dnf -y install python3 python3-pip jq
+pip install oci oci-cli
+mkdir -p ~/.oci
+chmod 700 ~/.oci
+chmod 600 ~/.oci/config
+chmod 600 ~/.oci/private_key
+
 sudo mkdir -p "${MOUNT_POINT}"
 chown -R USER "${MOUNT_POINT}"
 
