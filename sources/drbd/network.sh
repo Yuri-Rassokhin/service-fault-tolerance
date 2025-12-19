@@ -1,4 +1,4 @@
-#!/usr/bin
+#!/usr/bin/env bash
 
 # establish node resolution
 sudo tee /etc/hosts <<EOF

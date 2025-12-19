@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 
 
@@ -32,7 +32,7 @@ sudo drbdadm status r0
 cat /proc/drbd
 
 sudo mkdir -p "${MOUNT_POINT}"
-chown -R "$USER:$USER" "${MOUNT_POINT}"
+sudo chown -R "$USER:$USER" "${MOUNT_POINT}"
 
 
 
@@ -40,5 +40,7 @@ chown -R "$USER:$USER" "${MOUNT_POINT}"
 
 sudo drbdadm primary --force r0
 sudo mkfs.${FS} ${DRBD_DEVICE}
-sudo mount ${DRBD_DEVICE} ${MOUNT_POINT}
+
+# pacemaker will mount it itself
+#sudo mount ${DRBD_DEVICE} ${MOUNT_POINT} 
 

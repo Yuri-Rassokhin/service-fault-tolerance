@@ -1,4 +1,4 @@
-#!/usr/bin
+#!/usr/bin/env bash
 
 # configure kernel
 sudo grubby --set-default /boot/vmlinuz-5.14.0-611.13.1.el9_7.x86_64
