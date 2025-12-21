@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# user parameters
+
+
+# USER PARAMETERS
 
 SERVICE_HOSTNAME="ha-service"		# optional; hostname of the floating HA IP address
-SERVICE_IP="10.0.0.50"			# optional - TO BE REPLACTED WITH SUBNET
 MOUNT_POINT="/resilient" 		# optional
 FS="xfs" 				# optional
 IFACE="enp0s5"				# TO BE REMOVED
 
 
 
-# internal parameters
+# INTERNAL PARAMETERS
 
 NODE1_IP="10.0.0.253"
 NODE2_IP="10.0.0.150"
@@ -39,8 +40,6 @@ if [ ! -f "$OCI_CONFIG" ]; then
   exit 1
 fi
 
-exit
-
 VNIC_OCID=$(curl -s -H "Authorization: Bearer Oracle" http://169.254.169.254/opc/v2/vnics/ | jq -r '.[0].vnicId')
 SUBNET_OCID=$($OCI network vnic get --vnic-id "$VNIC_OCID" | jq -r '.data."subnet-id"')
 SERVICE_IP_OCID=$($OCI network private-ip list --subnet-id "$SUBNET_OCID" | jq -r --arg ip "$SERVICE_IP" '.data[] | select(."ip-address"==$ip) | .id' | head -n1)
@@ -50,7 +49,76 @@ if [[ -z "$SERVICE_IP_OCID" || "$SERVICE_IP_OCID" == "null" ]]; then
   exit 1
 fi
 
+SUBNET_CIDR=$("$OCI" network subnet get --subnet-id "$SUBNET_OCID" --query 'data.cidr-block' --raw-output)
 
+[ -z "$SUBNET_CIDR" ] && { echo "Error: Subnet CIDR not found"; exit 1; }
+
+USED_IPS=$("$OCI" network private-ip list --subnet-id "$SUBNET_OCID" --query 'data[]."ip-address"' --raw-output)
+
+FREE_IP=$(python3 - <<EOF
+import ipaddress
+
+subnet = ipaddress.ip_network("$SUBNET_CIDR")
+used = set("""
+$USED_IPS
+""".split())
+
+for ip in subnet.hosts():
+    ip = str(ip)
+    if ip not in used:
+        print(ip)
+        break
+EOF
+)
+
+[ -z "$FREE_IP" ] && { echo "ERROR: No free IPs in subnet"; exit 1; }
+
+echo "Selected floating IP: $FREE_IP"
+
+SERVICE_IP_OCID=$("$OCI" network vnic assign-private-ip --vnic-id "$VNIC_OCID" --ip-address "$FREE_IP" --query 'data.id' --raw-output)
+
+[ -z "$SERVICE_IP_OCID" ] && { echo "ERROR: Failed to assign private IP"; exit 1; }
+
+echo "Assigned floating IP $FREE_IP with OCID $SERVICE_IP_OCID"
+
+SERVICE_IP=$FREE_IP
+
+
+
+# SAVE HA STATE FOR REUSE IN RELATED SCRIPTS
+
+STATE_DIR="/var/lib/ha"
+STATE_FILE="${STATE_DIR}/ha_state.env"
+
+sudo mkdir -p "$STATE_DIR"
+sudo chmod 700 "$STATE_DIR"
+
+sudo tee "$STATE_FILE" >/dev/null <<EOF
+OCI="$OCI"
+SERVICE_IP="$SERVICE_IP"
+SERVICE_IP_OCID="$SERVICE_IP_OCID"
+SUBNET_OCID="$SUBNET_OCID"
+VNIC_OCID="$VNIC_OCID"
+REGION="$REGION"
+IFACE="$IFACE"
+CIDR_PREFIX="$CIDR_PREFIX"
+CREATED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+EOF
+
+sudo chmod 600 "$STATE_FILE"
+echo "HA state saved to $STATE_FILE"
+
+
+
+# OPEN FIREWALL FOR FLOATING IPs
+
+sudo firewall-cmd --permanent --add-service=http
+sudo firewall-cmd --permanent --add-service=https
+sudo firewall-cmd --reload
+
+
+
+exit
 
 # main entry point
 
