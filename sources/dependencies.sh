@@ -1,7 +1,20 @@
 #!/usr/bin/env bash
+set -e
 
-echo "setting system dependencies"
-sudo dnf -y install https://www.elrepo.org/elrepo-release-9.el9.elrepo.noarch.rpm
-sudo dnf -y install python3 python3-pip jq pacemaker corosync pcs resource-agents fence-agents-all kmod-drbd9x drbd9x-utils kernel kernel-core kernel-modules
+echo "Setting system dependencies"
+
+# Disable Oracle Linux repos if present (OCI image pollution)
+sudo dnf config-manager --disable 'oraclelinux-*' || true
+sudo dnf config-manager --set-enabled highavailability
+
+# Clean cache
+sudo dnf clean all
+sudo dnf makecache
+
+# Core dependencies
+sudo dnf -y install python3 python3-pip jq pacemaker corosync pcs resource-agents fence-agents-all
+
+# OCI SDK / CLI
 python3 -m pip install --user --upgrade oci oci-cli
+export PATH="$HOME/.local/bin:$PATH"
 

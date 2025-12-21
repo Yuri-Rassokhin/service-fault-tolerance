@@ -22,15 +22,28 @@ HACLUSTER_PASSWORD="ChangeMeStrongPassword"
 DRBD_DEVICE="/dev/drbd0"
 DRBD_RESOURCE="r0"
 DRBD_BLOCK_VOLUME_PATH="/dev/oracleoci/oraclevdb"
+SOURCES="./sources"
 
 source ./sources/dependencies.sh
 
-SOURCES="./sources"
 OCI="$HOME/.local/bin/oci"
+OCI_CONFIG="$HOME/.oci/config"
+
+if [ ! -x "$OCI" ]; then
+  echo "Error: OCI CLI not found or not executable at $OCI"
+  exit 1
+fi
+
+if [ ! -f "$OCI_CONFIG" ]; then
+  echo "Error: OCI CLI config not found at $OCI_CONFIG"
+  exit 1
+fi
+
+exit
+
 VNIC_OCID=$(curl -s -H "Authorization: Bearer Oracle" http://169.254.169.254/opc/v2/vnics/ | jq -r '.[0].vnicId')
 SUBNET_OCID=$($OCI network vnic get --vnic-id "$VNIC_OCID" | jq -r '.data."subnet-id"')
-SERVICE_IP_OCID=$($OCI network private-ip list --subnet-id "$SUBNET_OCID" \
-  | jq -r --arg ip "$SERVICE_IP" '.data[] | select(."ip-address"==$ip) | .id' | head -n1)
+SERVICE_IP_OCID=$($OCI network private-ip list --subnet-id "$SUBNET_OCID" | jq -r --arg ip "$SERVICE_IP" '.data[] | select(."ip-address"==$ip) | .id' | head -n1)
 
 if [[ -z "$SERVICE_IP_OCID" || "$SERVICE_IP_OCID" == "null" ]]; then
   echo "Error: service IP $SERVICE_IP not found in subnet $SUBNET_OCID" >&2
