@@ -8,11 +8,10 @@ set -euo pipefail
 SERVICE_HOSTNAME="ha-service"		# optional; hostname of the floating HA IP address
 MOUNT_POINT="/resilient" 		# optional
 FS="xfs" 				# optional
-IFACE="enp0s5"				# TO BE REMOVED
 
 
 
-# INTERNAL PARAMETERS
+# DEFINE INTERNAL PARAMETERS
 
 NODE1_IP="10.0.0.253"
 NODE2_IP="10.0.0.150"
@@ -24,6 +23,7 @@ DRBD_DEVICE="/dev/drbd0"
 DRBD_RESOURCE="r0"
 DRBD_BLOCK_VOLUME_PATH="/dev/oracleoci/oraclevdb"
 SOURCES="./sources"
+IFACE="enp0s5"
 
 source ./sources/dependencies.sh
 
@@ -40,16 +40,10 @@ if [ ! -f "$OCI_CONFIG" ]; then
   exit 1
 fi
 
+REGION=$("$OCI" iam region-subscription list --query 'data[0]."region-name"' --raw-output)
 VNIC_OCID=$(curl -s -H "Authorization: Bearer Oracle" http://169.254.169.254/opc/v2/vnics/ | jq -r '.[0].vnicId')
 SUBNET_OCID=$($OCI network vnic get --vnic-id "$VNIC_OCID" | jq -r '.data."subnet-id"')
-SERVICE_IP_OCID=$($OCI network private-ip list --subnet-id "$SUBNET_OCID" | jq -r --arg ip "$SERVICE_IP" '.data[] | select(."ip-address"==$ip) | .id' | head -n1)
-
-if [[ -z "$SERVICE_IP_OCID" || "$SERVICE_IP_OCID" == "null" ]]; then
-  echo "Error: service IP $SERVICE_IP not found in subnet $SUBNET_OCID" >&2
-  exit 1
-fi
-
-SUBNET_CIDR=$("$OCI" network subnet get --subnet-id "$SUBNET_OCID" --query 'data.cidr-block' --raw-output)
+SUBNET_CIDR=$("$OCI" network subnet get --subnet-id "$SUBNET_OCID" | jq -r '.data["ipv4-cidr-blocks"][0]')
 
 [ -z "$SUBNET_CIDR" ] && { echo "Error: Subnet CIDR not found"; exit 1; }
 
@@ -63,7 +57,9 @@ used = set("""
 $USED_IPS
 """.split())
 
-for ip in subnet.hosts():
+RESERVED_OFFSET = 4
+hosts = list(subnet.hosts())
+for ip in hosts[RESERVED_OFFSET:]:
     ip = str(ip)
     if ip not in used:
         print(ip)
@@ -71,16 +67,26 @@ for ip in subnet.hosts():
 EOF
 )
 
-[ -z "$FREE_IP" ] && { echo "ERROR: No free IPs in subnet"; exit 1; }
+[ -z "$FREE_IP" ] && { echo "Error: No free IPs in subnet"; exit 1; }
 
 echo "Selected floating IP: $FREE_IP"
 
+# unassign FREE_IP, if it is assigned anywhere
+SERVICE_IP_OCID=$("$OCI" network private-ip list --subnet-id "$SUBNET_OCID" --query "data[?\"ip-address\"=='$FREE_IP'].id | [0]" --raw-output)
+if [ -z "$SERVICE_IP_OCID" ] || [ "$SERVICE_IP_OCID" = "null" ]; then
+  echo "No existing private IP for $FREE_IP, nothing to detach"
+  SERVICE_IP_OCID=""
+fi
+if [ -n "$SERVICE_IP_OCID" ]; then
+  echo "Detaching existing private IP $FREE_IP (OCID=$SERVICE_IP_OCID)"
+  "$OCI" network private-ip delete --private-ip-id "$SERVICE_IP_OCID" --force
+  echo "Private IP $FREE_IP detached"
+fi
+
+# reassign FREE_IP for our purposes
 SERVICE_IP_OCID=$("$OCI" network vnic assign-private-ip --vnic-id "$VNIC_OCID" --ip-address "$FREE_IP" --query 'data.id' --raw-output)
-
-[ -z "$SERVICE_IP_OCID" ] && { echo "ERROR: Failed to assign private IP"; exit 1; }
-
+[ -z "$SERVICE_IP_OCID" ] && { echo "Error: Failed to assign private IP"; exit 1; }
 echo "Assigned floating IP $FREE_IP with OCID $SERVICE_IP_OCID"
-
 SERVICE_IP=$FREE_IP
 
 
@@ -101,7 +107,7 @@ SUBNET_OCID="$SUBNET_OCID"
 VNIC_OCID="$VNIC_OCID"
 REGION="$REGION"
 IFACE="$IFACE"
-CIDR_PREFIX="$CIDR_PREFIX"
+CIDR_PREFIX="$SUBNET_CIDR"
 CREATED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 EOF
 
@@ -112,13 +118,12 @@ echo "HA state saved to $STATE_FILE"
 
 # OPEN FIREWALL FOR FLOATING IPs
 
-sudo firewall-cmd --permanent --add-service=http
-sudo firewall-cmd --permanent --add-service=https
-sudo firewall-cmd --reload
+# NOTE: Rocky Linux comes without firewall RPM at all
+#sudo firewall-cmd --permanent --add-service=http
+#sudo firewall-cmd --permanent --add-service=https
+#sudo firewall-cmd --reload
 
 
-
-exit
 
 # main entry point
 
