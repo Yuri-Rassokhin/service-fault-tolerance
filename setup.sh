@@ -13,10 +13,10 @@ IFACE="enp0s5"				# TO BE REMOVED
 
 # internal parameters
 
-NODE1_IP="10.0.0.32"
-NODE2_IP="10.0.0.160"
-NODE1_NAME="demo-instance-1"
-NODE2_NAME="demo-instance-2"
+NODE1_IP="10.0.0.253"
+NODE2_IP="10.0.0.150"
+NODE1_NAME="ha-1"
+NODE2_NAME="ha-2"
 CLUSTER_NAME="ha-cluster"
 HACLUSTER_PASSWORD="ChangeMeStrongPassword"
 DRBD_DEVICE="/dev/drbd0"
