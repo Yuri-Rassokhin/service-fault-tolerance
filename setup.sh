@@ -130,9 +130,9 @@ echo "HA state saved to $STATE_FILE"
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "Setting up DRBD..."
-source "$DIR/sources/kernel.sh"
-source "$DIR/sources/network.sh"
-source "$DIR/sources/drbd.sh"
+source "$DIR/sources/drbd/kernel.sh"
+source "$DIR/sources/drbd/network.sh"
+source "$DIR/sources/drbd/drbd.sh"
 
 echo "Setting up Pacemaker & Corosync..."
 source "$DIR/sources/pacemaker/setup.sh"

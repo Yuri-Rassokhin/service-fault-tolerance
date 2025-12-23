@@ -32,6 +32,7 @@ if ! sudo modprobe drbd 2>/dev/null; then
 fi
 
 echo "DRBD kernel module loaded successfully"
-sudo rm $REBOOT_MARKER
-sudo rmdir /var/lib/drbd
+# keep the reboot marker to respect idempotency
+#sudo rm $REBOOT_MARKER
+#sudo rmdir /var/lib/drbd
 
