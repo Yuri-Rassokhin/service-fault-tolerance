@@ -39,11 +39,6 @@ locals {
   image_ocid = local.oracle_linux_latest.id
 }
 
-source_details {
-  source_type = "image"
-  source_id   = local.image_ocid
-}
-
 ############################
 # Block Volumes
 ############################
