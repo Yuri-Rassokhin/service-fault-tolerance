@@ -37,6 +37,7 @@ locals {
 
 locals {
   image_ocid = local.oracle_linux_latest.id
+  image_name = local.oracle_linux_latest.display_name
 }
 
 ############################
