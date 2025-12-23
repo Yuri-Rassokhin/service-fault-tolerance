@@ -46,11 +46,10 @@ locals {
 }
 
 locals {
-  oracle_linux_latest_major = max(
-    compact([
-      for r in local.oracle_linux_ranked : r.major
-    ])
-  )
+  oracle_linux_latest_major = max([
+    for r in local.oracle_linux_ranked : r.major
+    if r.major != null
+  ])
 }
 
 locals {
