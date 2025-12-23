@@ -31,8 +31,28 @@ locals {
       !can(regex("Minimal", img.display_name))
     )
   ]
+}
 
-  oracle_linux_latest = local.oracle_linux_filtered[0]
+locals {
+  # Add major release to each image
+  oracle_linux_ranked = [
+    for img in local.oracle_linux_filtered : {
+      img   = img
+      major = tonumber(regex("^Oracle-Linux-([0-9]+)", img.display_name)[0])
+    }
+  ]
+
+  # Determine the newest major release (10 > 9 > 8 > ...)
+  oracle_linux_latest_major = max([
+    for r in local.oracle_linux_ranked : r.major
+  ])
+
+  # Fetch the most recent build of this release
+  # It would be first entry because the list is already sorted
+  oracle_linux_latest = [
+    for r in local.oracle_linux_ranked : r.img
+    if r.major == local.oracle_linux_latest_major
+  ][0]
 }
 
 locals {
