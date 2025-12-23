@@ -1,0 +1,86 @@
+title: "Fault Tolerant Compute Resource on OCI"
+description: "Compute instance and storage that are tolerant to any failure and provide continuous availability"
+
+schemaVersion: 1.1.0
+
+locale: "en"
+
+variableGroups:
+
+  - title: "Location"
+    variables:
+      - region
+      - tenancy_ocid
+      - compartment_ocid
+      - vcn_ocid
+      - subnet_ocid
+
+  - title: "Fault Tolerant Compute Instance"
+    variables:
+      - shape
+      - ocpus
+      - memory_gbs
+
+  - title: "Fault Tolerant Storage"
+    variables:
+      - block_volume_size_gbs
+      - fs_type
+      - mount_point
+
+  - title: "User Endpoints"
+    variables:
+      - service_hostname
+      - ssh_public_key
+
+  - title: "Access Credentials"
+    variables:
+      - ha_cluster_password
+
+variables:
+
+  region:
+    title: "OCI Region"
+    description: "OCI region where the service will be deployed"
+
+  tenancy_ocid:
+    title: "Tenancy"
+    description: "OCI tenancy OCID where the service will be deployed"
+
+  compartment_ocid:
+    title: "Compartment"
+    description: "OCI compartment OCID where the service will be deployed"
+
+  vcn_ocid:
+    title: "VCN"
+    description: "Virtual Cloud Network OCID where the service will be deployed"
+
+  subnet_ocid:
+    title: "Subnet"
+    description: "Subnet OCID where the service will be deployed"
+
+  shape:
+    title: "Compute Shape"
+
+  ocpus:
+    title: "OCPUs"
+
+  memory_gbs:
+    title: "Memory (GB)"
+
+  ha_cluster_password:
+    title: "Fault-Tolerant Cluster Password"
+
+  block_volume_size_gbs:
+    title: "Raw Size (GB)"
+
+  fs_type:
+    title: "Filesystem"
+
+  mount_point:
+    title: "Mount Point"
+
+  service_hostname:
+    title: "HTTP Endpoint Name"
+
+  ssh_public_key:
+    title: "Public Key for External SSH Access"
