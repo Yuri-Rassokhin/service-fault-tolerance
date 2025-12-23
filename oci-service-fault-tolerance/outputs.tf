@@ -19,3 +19,8 @@ output "selected_image" {
     ocid = local.image_ocid
   }
 }
+
+output "oracle_linux_debug" {
+  value = local.oracle_linux_ranked
+}
+
