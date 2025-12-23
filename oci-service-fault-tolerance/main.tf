@@ -10,43 +10,38 @@ locals {
   availability_domain = data.oci_identity_availability_domains.ads.availability_domains[0].name
 }
 
-############################
-# Rocky Linux 9 Image
-############################
-
-data "oci_core_images" "oracle_linux_latest" {
-  compartment_id   = var.compartment_ocid
-  operating_system = "Oracle Linux"
-  shape            = var.shape
-
-  # Get Oracle Linux flavours only
-  filter {
-    name   = "display_name"
-    regex  = true
-    values = [
-      "^Oracle-Linux-[0-9]+\\.[0-9]+-[0-9]{4}\\.[0-9]{2}\\.[0-9]{2}-[0-9]+$"
-    ]
-  }
-
-  # Filter out anything but 'Oracle Linux' for x86_64
-  # NOTE: The filter automatially sorts results from the newest to oldest so we always get the latest release
-  filter {
-    name   = "display_name"
-    regex  = true
-    negate = true
-    values = [
-      ".*GPU.*",
-      ".*aarch64.*",
-      ".*Developer.*",
-      ".*Minimal.*",
-      ".*Autonomous.*"
-    ]
-  }
+data "oci_core_images" "oracle_linux_all" {
+  compartment_id           = var.compartment_ocid
+  operating_system         = "Oracle Linux"
+  operating_system_version = null
+  shape                    = var.shape
+  sort_by                  = "TIMECREATED"
+  sort_order               = "DESC"
 }
 
 locals {
-  image_ocid = data.oci_core_images.oracle_linux_latest.images[0].id
-  image_name = data.oci_core_images.oracle_linux_latest.images[0].display_name
+  oracle_linux_filtered = [
+    for img in data.oci_core_images.oracle_linux_all.images :
+    img
+    if (
+      can(regex("^Oracle-Linux-[0-9]+\\.", img.display_name)) &&
+      !can(regex("GPU", img.display_name)) &&
+      !can(regex("aarch", img.display_name)) &&
+      !can(regex("Developer", img.display_name)) &&
+      !can(regex("Minimal", img.display_name))
+    )
+  ]
+
+  oracle_linux_latest = local.oracle_linux_filtered[0]
+}
+
+locals {
+  image_ocid = local.oracle_linux_latest.id
+}
+
+source_details {
+  source_type = "image"
+  source_id   = local.image_ocid
 }
 
 ############################
