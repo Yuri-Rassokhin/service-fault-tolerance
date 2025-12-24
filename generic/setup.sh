@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # USER PARAMETERS
 
@@ -25,7 +25,9 @@ DRBD_BLOCK_VOLUME_PATH="/dev/oracleoci/oraclevdb"
 SOURCES="./sources"
 IFACE="enp0s5"
 
-source ./dependencies.sh
+
+
+source "$SCRIPT_DIR/dependencies.sh"
 
 # DEBUGGING
 echo "DONE"
@@ -131,16 +133,14 @@ echo "HA state saved to $STATE_FILE"
 
 # main entry point
 
-DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
 echo "Setting up DRBD..."
-source "$DIR/sources/drbd/kernel.sh"
-source "$DIR/sources/drbd/network.sh"
-source "$DIR/sources/drbd/drbd.sh"
+source "$SCRIPT_DIR/sources/drbd/kernel.sh"
+source "$SCRIPT_DIR/sources/drbd/network.sh"
+source "$SCRIPT_DIR/sources/drbd/drbd.sh"
 
 echo "Setting up Pacemaker & Corosync..."
-source "$DIR/sources/pacemaker/setup.sh"
+source "$SCRIPT_DIR/sources/pacemaker/setup.sh"
 
 echo "Setting up Floating IP..."
-source "$DIR/sources/floating-ip/setup.sh"
+source "$SCRIPT_DIR/sources/floating-ip/setup.sh"
 
