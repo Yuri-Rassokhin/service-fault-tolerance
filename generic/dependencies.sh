@@ -9,6 +9,7 @@ OL_MAJOR="${VERSION_ID%%.*}"
 
 # Ensure DNF plugin manager
 dnf install -y dnf-plugins-core
+dnf install -y 'dnf-command(versionlock)'
 # Disable Oracle Linux UEK, if any
 dnf config-manager --disable "ol${OL_MAJOR}_UEK*" || true
 # Enable base repos
@@ -40,8 +41,8 @@ BEFORE="$(rpm -q kernel-core --qf '%{VERSION}-%{RELEASE}.%{ARCH}\n' | sort)"
 # Install DRBD RPM packages
 dnf install -y kmod-drbd*x drbd*x-utils
 # Get kernel required by DRBD
-BEFORE="$(rpm -q kernel-core --qf '%{VERSION}-%{RELEASE}.%{ARCH}\n' | sort)"
-NEW_KERNELS="$(comm -13 <(echo "$BEFORE_KERNELS") <(echo "$AFTER_KERNELS"))"
+AFTER="$(rpm -q kernel-core --qf '%{VERSION}-%{RELEASE}.%{ARCH}\n' | sort)"
+NEW_KERNELS="$(comm -13 <(echo "$BEFORE") <(echo "$AFTER"))"
 
 if [[ -n "$NEW_KERNELS" ]]; then
   # If DRBD brought >1 kernels (which is unlikely), then we'll stick to the newest one
