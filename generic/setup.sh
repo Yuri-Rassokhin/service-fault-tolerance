@@ -25,7 +25,7 @@ DRBD_BLOCK_VOLUME_PATH="/dev/oracleoci/oraclevdb"
 SOURCES="./sources"
 IFACE="enp0s5"
 
-source ./sources/dependencies.sh
+source ./dependencies.sh
 
 # DEBUGGING
 echo "DONE"
