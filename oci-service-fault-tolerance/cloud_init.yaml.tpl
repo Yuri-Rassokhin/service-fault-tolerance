@@ -59,10 +59,7 @@ runcmd:
   - echo "[cloud-init] HA stack bootstrap started" >> /var/log/ha-bootstrap.log
 
   # Fetch HA scripts bundle
-mkdir -p /opt/ha && \
-  - curl -fsSL https://codeload.github.com/Yuri-Rassokhin/service-fault-tolerance/tar.gz/refs/heads/main \
-| tar -xz --strip-components=2 -C /opt/ha service-fault-tolerance-main/generic
-
-  # Execute main setup
+  - mkdir -p /opt/ha
+  - curl -fsSL https://codeload.github.com/Yuri-Rassokhin/service-fault-tolerance/tar.gz/refs/heads/main | tar -xz --strip-components=2 -C /opt/ha service-fault-tolerance-main/generic
   - bash /opt/ha/setup.sh >> /var/log/ha-bootstrap.log 2>&1
 
