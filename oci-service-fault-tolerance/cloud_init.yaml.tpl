@@ -1,5 +1,15 @@
 #cloud-config
 
+hostname: ${node_name}
+fqdn: ${node_name}.local
+
+package_update: false
+packages:
+  - git
+  - jq
+  - python3
+  - python3-pip
+
 write_files:
   - path: /etc/ha/stack.env
     permissions: "0600"
