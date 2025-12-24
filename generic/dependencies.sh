@@ -75,6 +75,7 @@ dnf versionlock add \
   kernel-modules-extra
 
 echo "Locking kernel packages hard way in DNF config"
+mkdir -p /etc/dnf/dnf.conf.d
 cat >/etc/dnf/dnf.conf.d/99-no-kernel.conf <<'EOF'
 [main]
 exclude=kernel* kmod*
