@@ -9,6 +9,7 @@ packages:
   - jq
   - python3
   - python3-pip
+  - curl
 
 write_files:
   - path: /etc/ha/stack.env
@@ -58,7 +59,9 @@ runcmd:
   - echo "[cloud-init] HA stack bootstrap started" >> /var/log/ha-bootstrap.log
 
   # Fetch HA scripts bundle
-  - curl -fsSL https://example.com/ha-scripts.tar.gz | tar -xz -C /opt/ha
+mkdir -p /opt/ha && \
+  - curl -fsSL https://codeload.github.com/Yuri-Rassokhin/service-fault-tolerance/tar.gz/refs/heads/main \
+| tar -xz --strip-components=2 -C /opt/ha service-fault-tolerance-main/generic
 
   # Execute main setup
   - bash /opt/ha/setup.sh >> /var/log/ha-bootstrap.log 2>&1

@@ -27,6 +27,10 @@ IFACE="enp0s5"
 
 source ./sources/dependencies.sh
 
+# DEBUGGING
+echo "DONE"
+exit
+
 OCI="$HOME/.local/bin/oci"
 OCI_CONFIG="$HOME/.oci/config"
 
