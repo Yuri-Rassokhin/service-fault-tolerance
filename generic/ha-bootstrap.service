@@ -1,0 +1,15 @@
+# /etc/systemd/system/ha-bootstrap.service
+[Unit]
+Description=HA Stack Bootstrap (post-reboot)
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=!/var/lib/ha/bootstrap.done
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/ha/stack.env
+ExecStart=/opt/ha/continue.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
