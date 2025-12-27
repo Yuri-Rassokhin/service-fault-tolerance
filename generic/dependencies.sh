@@ -92,6 +92,5 @@ else
 fi
 
 # OCI SDK / CLI
-#python3 -m pip install --user --upgrade oci oci-cli
-#export PATH="$HOME/.local/bin:$PATH"
+dnf -y install python3 python3-pip python-oci-cli oci-utils
 

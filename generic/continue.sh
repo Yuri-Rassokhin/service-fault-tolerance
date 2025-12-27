@@ -13,6 +13,9 @@ bash /opt/ha/drbd/network.sh
 # Block Volume
 bash /opt/ha/storage.sh
 
+# Determine and configure Floating IP
+bash /opt/ha/floating-ip/determine.sh
+
 # 3. DRBD
 #bash /opt/ha/sources/drbd.sh
 
