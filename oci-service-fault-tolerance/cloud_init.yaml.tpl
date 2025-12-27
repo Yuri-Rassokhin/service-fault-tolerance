@@ -56,10 +56,11 @@ runcmd:
   - chmod 700 /etc/ha
 
   # Optional: log cloud-init progress
-  - echo "[cloud-init] HA stack bootstrap started" >> /var/log/ha-bootstrap.log
+  - echo "HA stack bootstrap started" >> /var/log/ha-bootstrap.log
 
   # Fetch HA scripts bundle
   - mkdir -p /opt/ha
   - curl -fsSL https://codeload.github.com/Yuri-Rassokhin/service-fault-tolerance/tar.gz/refs/heads/main | tar -xz --strip-components=2 -C /opt/ha service-fault-tolerance-main/generic
+  - cp /opt/ha/ha-bootstrap.service /etc/systemd/system/ha-bootstrap.service
   - bash /opt/ha/setup.sh >> /var/log/ha-bootstrap.log 2>&1
 
