@@ -63,7 +63,7 @@ SERVICE_IP_OCID=$(oci network private-ip list \
   --raw-output)
 
 if [[ -n "$SERVICE_IP_OCID" && "$SERVICE_IP_OCID" != "null" ]]; then
-  echo "[fip] Detaching existing private IP $FREE_IP (OCID=$SERVICE_IP_OCID)"
+  echo "Detaching existing private IP $FREE_IP (OCID=$SERVICE_IP_OCID)"
   oci network private-ip delete \
     --private-ip-id "$SERVICE_IP_OCID" \
     --force
