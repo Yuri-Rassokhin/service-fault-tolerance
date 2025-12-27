@@ -10,6 +10,9 @@ lsmod | grep drbd
 # Network configuration
 bash /opt/ha/drbd/network.sh
 
+# Block Volume
+bash /opt/ha/storage.sh
+
 # 3. DRBD
 #bash /opt/ha/sources/drbd.sh
 

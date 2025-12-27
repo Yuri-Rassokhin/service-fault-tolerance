@@ -28,7 +28,6 @@ write_files:
       # Storage (DRBD)
       ############################
       VOLUME_OCID=${volume_ocid}
-      BLOCK_DEVICE=/dev/oracleoci/oraclevdb
       FS_TYPE=${fs_type}
       MOUNT_POINT=${mount_point}
 
