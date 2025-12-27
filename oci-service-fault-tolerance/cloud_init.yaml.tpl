@@ -30,6 +30,8 @@ write_files:
       VOLUME_OCID=${volume_ocid}
       FS_TYPE=${fs_type}
       MOUNT_POINT=${mount_point}
+      DRBD_DEVICE=/dev/drbd0
+      DRBD_RESOURCE=r0
 
       ############################
       # OCI networking context

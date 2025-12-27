@@ -16,8 +16,8 @@ bash /opt/ha/storage.sh
 # Determine and configure Floating IP
 bash /opt/ha/floating-ip/determine.sh
 
-# 3. DRBD
-#bash /opt/ha/sources/drbd.sh
+# Configure and start DRBD device
+bash /opt/ha/drbd/drbd.sh
 
 # 4. Corosync + Pacemaker
 #bash /opt/ha/sources/cluster.sh
