@@ -61,6 +61,7 @@ runcmd:
   # Fetch HA scripts bundle
   - mkdir -p /opt/ha
   - curl -fsSL https://codeload.github.com/Yuri-Rassokhin/service-fault-tolerance/tar.gz/refs/heads/main | tar -xz --strip-components=2 -C /opt/ha service-fault-tolerance-main/generic
+  - chmod +x /opt/ha/*.sh
 
   # Configure HA phase 2 (post-reboot)
   - cp /opt/ha/ha-bootstrap.service /etc/systemd/system/ha-bootstrap.service
