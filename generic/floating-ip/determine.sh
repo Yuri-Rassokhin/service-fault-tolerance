@@ -25,15 +25,9 @@ echo "Instance OCID: $INSTANCE_OCID"
 echo "VNIC OCID: $VNIC_OCID"
 
 # Collect used IPs in subnet
-USED_IPS=$(oci network private-ip list \
-  --subnet-id "$SUBNET_OCID" \
-  --query 'data[]."ip-address"' \
-  --raw-output)
+USED_IPS=$(oci network private-ip list --subnet-id "$SUBNET_OCID" --query 'data[]."ip-address"' --raw-output)
 
-SUBNET_CIDR=$(oci network subnet get \
-  --subnet-id "$SUBNET_OCID" \
-  --query 'data.cidr-block' \
-  --raw-output)
+SUBNET_CIDR=$(oci network subnet get --subnet-id "$SUBNET_OCID" --query 'data."cidr-block"' --raw-output)
 
 # Find free IP in subnet
 FREE_IP=$(python3 - <<EOF
