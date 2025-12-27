@@ -83,7 +83,11 @@ fi
 
 echo "Assigned floating IP $FREE_IP (OCID=$SERVICE_IP_OCID)"
 
-# Persist result
-echo "SERVICE_IP=$FREE_IP" >> /etc/ha/stack.env
-# TODO: avoid duplicated entries in stack.env
+# Persist floating IP in HA status file
+KEY="SERVICE_IP"
+FILE="/etc/ha/stack.env"
+# Remove existing floating IP, if any
+sed -i "/^${KEY}=.*/d" "$FILE"
+# Append fresh value
+echo "${KEY}=${FREE_IP}" >> "$FILE"
 
