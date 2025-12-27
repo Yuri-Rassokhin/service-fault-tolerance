@@ -7,8 +7,8 @@ echo "Post-reboot HA bootstrap started"
 modprobe drbd
 lsmod | grep drbd
 
-# 2. Network prep
-#bash /opt/ha/sources/network.sh
+# Network configuration
+bash /opt/ha/drbd/network.sh
 
 # 3. DRBD
 #bash /opt/ha/sources/drbd.sh
