@@ -2,6 +2,11 @@
 set -euo pipefail
 exec >> /var/log/ha-bootstrap.log 2>&1
 
+# OCI SDK / CLI
+echo "Installing OCI CLI"
+dnf -y install python3 python3-pip
+dnf -y install python-oci-cli
+
 echo "Selecting and assigning floating private IP"
 
 export OCI_CLI_AUTH=instance_principal

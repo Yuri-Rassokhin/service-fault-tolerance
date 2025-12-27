@@ -91,6 +91,3 @@ else
   echo "Already running DRBD-compatible kernel, no reboot required"
 fi
 
-# OCI SDK / CLI
-dnf -y install python3 python3-pip python-oci-cli oci-utils
-
