@@ -5,6 +5,7 @@ set -euo pipefail
 source /etc/ha/stack.env
 
 # Make DRBD commands non-interactive
+mkdir -p /etc/drbd.d
 tee /etc/drbd.d/global_common.conf <<EOF
 global {
     usage-count no;
@@ -26,7 +27,6 @@ PEER_IP=$(getent hosts "${PEER_NODE_NAME}" | awk '{print $1}' || true)
 
 echo "Setting DRBD device configuration file"
 # define configuration of DRBD device
-mkdir -p /etc/drbd.d
 tee /etc/drbd.d/${DRBD_RESOURCE}.res <<EOF
 resource ${DRBD_RESOURCE} {
     protocol C;
