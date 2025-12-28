@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+exec >> /var/log/ha-bootstrap.log 2>&1
 
 echo "Post-reboot HA bootstrap started"
 
