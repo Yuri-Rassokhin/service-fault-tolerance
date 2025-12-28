@@ -18,14 +18,19 @@ dnf config-manager --enable "ol${OL_MAJOR}_baseos_latest"
 dnf config-manager --enable "ol${OL_MAJOR}_appstream"
 dnf config-manager --enable "ol${OL_MAJOR}_addons"
 
-# Install ELRepo for DRBD
-if ! rpm -q elrepo-release >/dev/null 2>&1; then
-  ELREPO_RPM="https://www.elrepo.org/elrepo-release-${OL_MAJOR}.el${OL_MAJOR}.elrepo.noarch.rpm"
-  echo "[deps] Installing ELRepo from ${ELREPO_RPM}"
-  dnf install -y "${ELREPO_RPM}"
-fi
+echo "Enabling ELRepo"
+rpm -e elrepo-release || true
+tee /etc/yum.repos.d/elrepo.repo <<EOF
+[elrepo]
+name=ELRepo.org Community Enterprise Linux Repository - el${OL_MAJOR}
+baseurl=http://elrepo.org/linux/elrepo/el${OL_MAJOR}/$basearch/
+enabled=1
+countme=1
+gpgcheck=0
+EOF
+dnf makecache
 
-# Install core HA packages
+echo "Installing core HA packages"
 dnf install -y \
   jq \
   git \
