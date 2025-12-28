@@ -181,11 +181,13 @@ resource "oci_core_instance" "node2" {
 resource "oci_core_volume_attachment" "attach1" {
   instance_id     = oci_core_instance.node1.id
   volume_id       = oci_core_volume.drbd_volume_1.id
-  attachment_type = "paravirtualized"
+  attachment_type = "iscsi"
+  device          = "/dev/oracleoci/oraclevdb"
 }
 
 resource "oci_core_volume_attachment" "attach2" {
   instance_id     = oci_core_instance.node2.id
   volume_id       = oci_core_volume.drbd_volume_2.id
-  attachment_type = "paravirtualized"
+  attachment_type = "iscsi"
+  device          = "/dev/oracleoci/oraclevdb"
 }
