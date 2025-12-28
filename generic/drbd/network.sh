@@ -36,7 +36,9 @@ echo "Disabling firewalld (OCI security enforced externally)"
 
 if systemctl list-unit-files | grep -q firewalld.service; then
   systemctl stop firewalld || true
-  systemctl disable firewalld || true
+  systemctl disable --now firewalld || true
   systemctl mask firewalld || true
 fi
+
+echo "HA networking configured"
 
