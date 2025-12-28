@@ -23,7 +23,7 @@ rpm -e elrepo-release || true
 tee /etc/yum.repos.d/elrepo.repo <<EOF
 [elrepo]
 name=ELRepo.org Community Enterprise Linux Repository - el${OL_MAJOR}
-baseurl=http://elrepo.org/linux/elrepo/el${OL_MAJOR}/$basearch/
+baseurl=http://elrepo.org/linux/elrepo/el${OL_MAJOR}/$(arch)/
 enabled=1
 countme=1
 gpgcheck=0
