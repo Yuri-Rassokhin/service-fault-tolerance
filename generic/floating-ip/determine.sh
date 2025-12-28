@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-exec >> /var/log/ha-bootstrap.log 2>&1
+#exec >> /var/log/ha-bootstrap.log 2>&1
 
 # OCI SDK / CLI
 echo "Installing OCI CLI"

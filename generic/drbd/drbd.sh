@@ -1,8 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
-exec >> /var/log/ha-bootstrap.log 2>&1
+#exec >> /var/log/ha-bootstrap.log 2>&1
 
 source /etc/ha/stack.env
+
+# Make DRBD commands non-interactive
+tee /etc/drbd.d/global_common.conf <<EOF
+global {
+    usage-count no;
+}
+EOF
 
 # clean up any previous DRBD, if any
 umount ${DRBD_DEVICE}
