@@ -36,5 +36,27 @@ if [[ ! -b "${ISCSI_DEVICE}" ]]; then
 fi
 
 echo "iSCSI block device is ready: ${ISCSI_DEVICE}"
-#echo "BLOCK_DEVICE=/dev/${BLOCK_DEVICE}" >> /etc/ha/stack.env
-echo "HA storage configured"
+
+HA_STATE_FILE="/etc/ha/state.env"
+DEVICE_PATH="/dev/oracleoci/oraclevdb"
+
+# Sanity check
+if [[ ! -b "$DEVICE_PATH" ]]; then
+  echo "Fatal: iSCSI device $DEVICE_PATH not found"
+  exit 1
+fi
+
+# Ensure state file exists and is available for writing
+mkdir -p /etc/ha
+touch "$HA_STATE_FILE"
+chmod +w "$HA_STATE_FILE"
+
+# Idempotent write
+if grep -qE '^BLOCK_DEVICE=' "$HA_STATE_FILE"; then
+  sed -i "s|^BLOCK_DEVICE=.*|BLOCK_DEVICE=${DEVICE_PATH}|" "$HA_STATE_FILE"
+  echo "Updated BLOCK_DEVICE=${DEVICE_PATH}"
+else
+  echo "BLOCK_DEVICE=${DEVICE_PATH}" >> "$HA_STATE_FILE"
+  echo "Added BLOCK_DEVICE=${DEVICE_PATH} to HA state file"
+fi
+
