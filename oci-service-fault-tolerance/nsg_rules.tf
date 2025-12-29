@@ -57,3 +57,11 @@ resource "oci_core_network_security_group_security_rule" "service_http" {
     }
   }
 }
+
+# General routing inside
+resource "oci_core_network_security_group_security_rule" "egress_all" {
+  network_security_group_id = oci_core_network_security_group.ha_nsg.id
+  direction                 = "EGRESS"
+  protocol                  = "all"
+  destination               = "0.0.0.0/0"
+}
