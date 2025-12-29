@@ -13,8 +13,8 @@ global {
 EOF
 
 # clean up any previous DRBD, if any
-umount ${DRBD_DEVICE}
-drbdadm down "${DRBD_RESOURCE}"
+umount ${DRBD_DEVICE} || true
+drbdadm down "${DRBD_RESOURCE}" || true
 wipefs -fa "${BLOCK_DEVICE}"
 
 # Get local IP from OCI metadata
