@@ -29,4 +29,9 @@ bash /opt/ha/drbd/drbd.sh
 # Finally, mark creation of DRBD to avoid re-creating it from scratch every time node reboots
 mkdir -p /var/lib/ha
 touch /var/lib/ha/bootstrap.done
+# Remove HA bootstrap service to prevent it from accidental launch - it is VERY disruptive
+systemctl disable ha-bootstrap.service || true
+rm -f /etc/systemd/system/ha-bootstrap.service
+systemctl daemon-reload
+
 echo "Post-reboot HA bootstrap completed"

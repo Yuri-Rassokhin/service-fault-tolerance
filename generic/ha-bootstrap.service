@@ -9,7 +9,7 @@ ConditionPathExists=!/var/lib/ha/bootstrap.done
 Type=oneshot
 EnvironmentFile=/etc/ha/stack.env
 ExecStart=/opt/ha/continue.sh
-RemainAfterExit=yes
+RemainAfterExit=no
 
 [Install]
 WantedBy=multi-user.target
