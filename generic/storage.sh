@@ -37,7 +37,7 @@ fi
 
 echo "iSCSI block device is ready: ${ISCSI_DEVICE}"
 
-HA_STATE_FILE="/etc/ha/state.env"
+HA_STATE_FILE="/etc/ha/stack.env"
 DEVICE_PATH="/dev/oracleoci/oraclevdb"
 
 # Sanity check
