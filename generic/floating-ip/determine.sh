@@ -2,30 +2,41 @@
 set -euo pipefail
 exec >> /var/log/ha-bootstrap.log 2>&1
 
-echo "Selecting and assigning floating private IP"
-
 export OCI_CLI_AUTH=instance_principal
 
-# Load HA context
 source /etc/ha/stack.env
 
-METADATA="http://169.254.169.254/opc/v2"
-AUTH_HEADER="Authorization: Bearer Oracle"
+# Only Primary node determines Service IP to avoid race erros in OCI CLI IP command
+if [[ "$NODE_NAME" < "$PEER_NODE_NAME" ]]; then
+  ROLE="primary"
+else
+  ROLE="secondary"
+fi
 
-# Get instance + VNIC context
-INSTANCE_OCID=$(curl -s -H "$AUTH_HEADER" "$METADATA/instance/" | jq -r '.id')
-VNIC_OCID=$(curl -s -H "$AUTH_HEADER" "$METADATA/vnics/" | jq -r '.[0].vnicId')
+if [[ "$ROLE" = "primary" ]]; then
 
-echo "Instance OCID: $INSTANCE_OCID"
-echo "VNIC OCID: $VNIC_OCID"
+	echo "Primary node ${NODE_NAME} is determining and assigning floating private IP"
 
-# Collect used IPs in subnet
-USED_IPS=$(oci network private-ip list --subnet-id "$SUBNET_OCID" --query 'data[]."ip-address"' --raw-output)
+	# Load HA context
+	source /etc/ha/stack.env
 
-SUBNET_CIDR=$(oci network subnet get --subnet-id "$SUBNET_OCID" --query 'data."cidr-block"' --raw-output)
+	METADATA="http://169.254.169.254/opc/v2"
+	AUTH_HEADER="Authorization: Bearer Oracle"
 
-# Find free IP in subnet
-FREE_IP=$(python3 - <<EOF
+	# Get instance + VNIC context
+	INSTANCE_OCID=$(curl -s -H "$AUTH_HEADER" "$METADATA/instance/" | jq -r '.id')
+	VNIC_OCID=$(curl -s -H "$AUTH_HEADER" "$METADATA/vnics/" | jq -r '.[0].vnicId')
+
+	echo "Instance OCID: $INSTANCE_OCID"
+	echo "VNIC OCID: $VNIC_OCID"
+
+	# Collect used IPs in subnet
+	USED_IPS=$(oci network private-ip list --subnet-id "$SUBNET_OCID" --query 'data[]."ip-address"' --raw-output)
+
+	SUBNET_CIDR=$(oci network subnet get --subnet-id "$SUBNET_OCID" --query 'data."cidr-block"' --raw-output)
+
+	# Find free IP in subnet
+	FREE_IP=$(python3 - <<EOF
 import ipaddress
 
 subnet = ipaddress.ip_network("$SUBNET_CIDR")
@@ -44,45 +55,39 @@ for ip in subnet.hosts():
 EOF
 )
 
-if [[ -z "$FREE_IP" ]]; then
-  echo "Error: No free IPs left in subnet"
-  exit 1
+	if [[ -z "$FREE_IP" ]]; then
+	  echo "Error: No free IPs left in subnet"
+	  exit 1
+	fi
+
+	echo "Selected floating IP: $FREE_IP"
+
+	# Check if IP already exists somewhere
+	SERVICE_IP_OCID=$(oci network private-ip list --subnet-id "$SUBNET_OCID" --query "data[?\"ip-address\"=='$FREE_IP'].id | [0]" --raw-output)
+
+	if [[ -n "$SERVICE_IP_OCID" && "$SERVICE_IP_OCID" != "null" ]]; then
+  		echo "Detaching existing private IP $FREE_IP (OCID=$SERVICE_IP_OCID)"
+  		oci network private-ip delete --private-ip-id "$SERVICE_IP_OCID" --force
+	fi
+
+	# Assign IP to our VNIC
+	SERVICE_IP_OCID=$(oci network vnic assign-private-ip --vnic-id "$VNIC_OCID" --ip-address "$FREE_IP" --query 'data.id' --raw-output)
+
+	if [[ -z "$SERVICE_IP_OCID" || "$SERVICE_IP_OCID" == "null" ]]; then
+  		echo "Error: failed to assign floating IP"
+  		exit 1
+	fi
+
+	echo "Assigned floating IP $FREE_IP (OCID=$SERVICE_IP_OCID)"
+
+	# Persist floating IP in HA status file
+	KEY="SERVICE_IP"
+	FILE="/etc/ha/stack.env"
+	# Remove existing floating IP, if any
+	sed -i "/^${KEY}=.*/d" "$FILE"
+	# Append fresh value
+	echo "${KEY}=${FREE_IP}" >> "$FILE"
+
+else
+	echo "Node $NODE_NAME is secondary, it does not have to determine floating IP"
 fi
-
-echo "Selected floating IP: $FREE_IP"
-
-# Check if IP already exists somewhere
-SERVICE_IP_OCID=$(oci network private-ip list \
-  --subnet-id "$SUBNET_OCID" \
-  --query "data[?\"ip-address\"=='$FREE_IP'].id | [0]" \
-  --raw-output)
-
-if [[ -n "$SERVICE_IP_OCID" && "$SERVICE_IP_OCID" != "null" ]]; then
-  echo "Detaching existing private IP $FREE_IP (OCID=$SERVICE_IP_OCID)"
-  oci network private-ip delete \
-    --private-ip-id "$SERVICE_IP_OCID" \
-    --force
-fi
-
-# Assign IP to our VNIC
-SERVICE_IP_OCID=$(oci network vnic assign-private-ip \
-  --vnic-id "$VNIC_OCID" \
-  --ip-address "$FREE_IP" \
-  --query 'data.id' \
-  --raw-output)
-
-if [[ -z "$SERVICE_IP_OCID" || "$SERVICE_IP_OCID" == "null" ]]; then
-  echo "Error: failed to assign floating IP"
-  exit 1
-fi
-
-echo "Assigned floating IP $FREE_IP (OCID=$SERVICE_IP_OCID)"
-
-# Persist floating IP in HA status file
-KEY="SERVICE_IP"
-FILE="/etc/ha/stack.env"
-# Remove existing floating IP, if any
-sed -i "/^${KEY}=.*/d" "$FILE"
-# Append fresh value
-echo "${KEY}=${FREE_IP}" >> "$FILE"
-
