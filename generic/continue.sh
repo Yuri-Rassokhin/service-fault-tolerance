@@ -26,5 +26,7 @@ bash /opt/ha/drbd/drbd.sh
 # 5. Floating IP (OCI API, instance principal)
 #bash /opt/ha/sources/floating-ip.sh
 
+# Finally, mark deletion
+mkdir -p /var/lib/ha
 touch /var/lib/ha/bootstrap.done
 echo "Post-reboot HA bootstrap completed"
