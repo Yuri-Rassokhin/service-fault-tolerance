@@ -18,8 +18,8 @@ dnf config-manager --enable "ol${OL_MAJOR}_baseos_latest"
 dnf config-manager --enable "ol${OL_MAJOR}_appstream"
 dnf config-manager --enable "ol${OL_MAJOR}_addons"
 
-echo "Enabling OCI Utils"
-dnf -y install oci-utils
+echo "Enabling OCI CLI tools"
+dnf -y install oci-utils python-oci-cli python3 python3-pip
 
 echo "Enabling ELRepo"
 rpm -e elrepo-release || true
@@ -37,8 +37,6 @@ echo "Installing core HA packages"
 dnf install -y \
   jq \
   git \
-  python3 \
-  python3-pip \
   pacemaker \
   corosync \
   pcs \
