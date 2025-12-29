@@ -5,7 +5,7 @@ exec >> /var/log/ha-bootstrap.log 2>&1
 export OCI_CLI_AUTH=instance_principal
 
 echo "Configuring HA storage"
-ISCSI_ATTACHMENT=$(oci compute volume-attachment list --instance-id $(oci-instanceid))
+ISCSI_ATTACHMENT=$(oci compute volume-attachment list --instance-id $(oci-instanceid) --query 'data[0].id' --raw-output)
 ISCSI_DETAILS=$(oci compute volume-attachment get --volume-attachment-id ${ISCSI_ATTACHMENT})
 
 ISCSI_IP=$(echo "$ISCSI_DETAILS" | jq -r '.data.ipv4')
