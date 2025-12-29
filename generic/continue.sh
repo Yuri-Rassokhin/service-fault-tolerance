@@ -26,7 +26,7 @@ bash /opt/ha/drbd/drbd.sh
 # 5. Floating IP (OCI API, instance principal)
 #bash /opt/ha/sources/floating-ip.sh
 
-# Finally, mark deletion
+# Finally, mark creation of DRBD to avoid re-creating it from scratch every time node reboots
 mkdir -p /var/lib/ha
 touch /var/lib/ha/bootstrap.done
 echo "Post-reboot HA bootstrap completed"
