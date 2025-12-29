@@ -18,6 +18,9 @@ dnf config-manager --enable "ol${OL_MAJOR}_baseos_latest"
 dnf config-manager --enable "ol${OL_MAJOR}_appstream"
 dnf config-manager --enable "ol${OL_MAJOR}_addons"
 
+echo "Enabling OCI Utils"
+dnf -y install oci-utils
+
 echo "Enabling ELRepo"
 rpm -e elrepo-release || true
 tee /etc/yum.repos.d/elrepo.repo <<EOF

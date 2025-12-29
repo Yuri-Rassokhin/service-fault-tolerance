@@ -36,10 +36,12 @@ resource "oci_identity_dynamic_group" "ha_nodes" {
 resource "oci_identity_policy" "ha_nodes_policy" {
   compartment_id = var.compartment_ocid
   name           = local.policy_name
-  description    = "Allow HA nodes to manage networking for floating IP failover"
+  description    = "Allow HA nodes to manage their configurations"
 
   statements = [
     "Allow dynamic-group ${oci_identity_dynamic_group.ha_nodes.name} to manage virtual-network-family in compartment id ${var.compartment_ocid}",
-    "Allow dynamic-group ${oci_identity_dynamic_group.ha_nodes.name} to read instance-family in compartment id ${var.compartment_ocid}",
+    "Allow dynamic-group ${oci_identity_dynamic_group.ha_nodes.name} to manage instance-family in compartment id ${var.compartment_ocid}",
+    "Allow dynamic-group ${oci_identity_dynamic_group.ha_nodes.name} to manage volume-attachments in compartment id ${var.compartment_ocid}",
+    "Allow dynamic-group ${oci_identity_dynamic_group.ha_nodes.name} to manage volumes in compartment id ${var.compartment_ocid}"
   ]
 }
