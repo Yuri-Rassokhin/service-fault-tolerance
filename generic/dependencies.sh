@@ -34,14 +34,7 @@ EOF
 dnf makecache
 
 echo "Installing core HA packages"
-dnf install -y \
-  jq \
-  git \
-  pacemaker \
-  corosync \
-  pcs \
-  resource-agents \
-  fence-agents-all
+dnf install -y jq git pacemaker corosync pcs resource-agents fence-agents-all iscsi-initiator-utils
 
 # Get kernel installed BEFORE DRBD installation
 BEFORE="$(rpm -q kernel-core --qf '%{VERSION}-%{RELEASE}.%{ARCH}\n' | sort)"
