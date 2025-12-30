@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
+set -euo pipefail
+exec >> /var/log/ha-bootstrap.log 2>&1
 
-echo "setting Pacemaker and Corosync"
+STATE_FILE="/etc/ha/stack.env"
+source "$STATE_FILE"
 
+echo "Setting Pacemaker and Corosync"
 # Persist and spin up pacemaker
 sudo systemctl enable pcsd
 sudo systemctl start pcsd
@@ -11,6 +15,7 @@ sudo pcs client local-auth -u hacluster -p "${HA_CLUSTER_PASSWORD}"
 
 # On Primary node, configure HA resources and policies
 if [[ "$ROLE" == "primary" ]]; then
+	echo "Configuring HA policies"
 	sudo pcs host auth ${NODE_NAME} ${PEER_NODE_NAME} -u hacluster -p "${HA_CLUSTER_PASSWORD}"
 	sudo pcs cluster setup "${CLUSTER_NAME}" ${NODE_NAME} ${PEER_NODE_NAME} --force
 	sudo pcs cluster start --all
@@ -19,6 +24,7 @@ if [[ "$ROLE" == "primary" ]]; then
 	sudo pcs property set no-quorum-policy=stop
 	sudo pcs property set cluster-recheck-interval=1s
 	sudo pcs status
+	echo "Configuring HA resources"
 	# integrate DRBD to Pacemaker
 	sudo pcs resource create drbd_${DRBD_RESOURCE} ocf:linbit:drbd drbd_resource=${DRBD_RESOURCE} op monitor interval=1s role=Promoted op monitor interval=1s role=Unpromoted
 	sudo pcs resource promotable drbd_${DRBD_RESOURCE} promoted-max=1 promoted-node-max=1 clone-max=2 clone-node-max=1 notify=true
@@ -30,3 +36,4 @@ if [[ "$ROLE" == "primary" ]]; then
 	sudo pcs status
 fi
 
+echo "HA cluster has been configured"
