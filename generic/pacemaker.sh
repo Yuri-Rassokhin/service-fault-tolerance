@@ -19,16 +19,19 @@ if [[ "$ROLE" == "primary" ]]; then
 	pcs host auth ${NODE_NAME} ${PEER_NODE_NAME} -u hacluster -p "${HA_CLUSTER_PASSWORD}"
 	pcs cluster setup "${CLUSTER_NAME}" ${NODE_NAME} ${PEER_NODE_NAME} --force
 	pcs cluster start --all
+	pcs status corosync
+	pcs status pcsd
 	pcs cluster enable --all
 	pcs property set stonith-enabled=false
-	pcs property set no-quorum-policy=stop
-	pcs property set cluster-recheck-interval=1s
+	pcs property set two_node=1
+	pcs property set no-quorum-policy=ignore
+	pcs property set cluster-recheck-interval=5s
 	pcs status
 	echo "Configuring HA resources"
 	# integrate DRBD to Pacemaker
-	pcs resource create drbd_${DRBD_RESOURCE} ocf:linbit:drbd drbd_resource=${DRBD_RESOURCE} op monitor interval=1s role=Promoted op monitor interval=1s role=Unpromoted
+	pcs resource create drbd_${DRBD_RESOURCE} ocf:linbit:drbd drbd_resource=${DRBD_RESOURCE} op monitor interval=10s role=Promoted op monitor interval=20s role=Unpromoted
 	pcs resource promotable drbd_${DRBD_RESOURCE} promoted-max=1 promoted-node-max=1 clone-max=2 clone-node-max=1 notify=true
-	pcs resource create fs_${DRBD_RESOURCE} Filesystem device=${DRBD_DEVICE} directory="${MOUNT_POINT}" fstype="${FS_TYPE}" options="noatime" op monitor interval=1s
+	pcs resource create fs_${DRBD_RESOURCE} Filesystem device=${DRBD_DEVICE} directory="${MOUNT_POINT}" fstype="${FS_TYPE}" options="noatime" op monitor interval=20s
 	pcs constraint colocation add fs_${DRBD_RESOURCE} with promoted drbd_${DRBD_RESOURCE}-clone INFINITY
 	pcs constraint order promote drbd_${DRBD_RESOURCE}-clone then start fs_${DRBD_RESOURCE}
 	echo "waiting 20 seconds for DRBD resource to come under Cosorync control..."
