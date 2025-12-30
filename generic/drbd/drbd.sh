@@ -44,8 +44,6 @@ resource ${DRBD_RESOURCE} {
 }
 EOF
 
-if [[ "$ROLE" == "primary" ]]; then
-	echo "Initializing DRBD metadata on Primary"
-	drbdadm create-md --force ${DRBD_RESOURCE}
-fi
+echo "Initializing DRBD metadata"
+drbdadm create-md --force ${DRBD_RESOURCE}
 
