@@ -33,12 +33,9 @@ echo "/etc/hosts updated"
 
 # Disabling firewall as excessive layer of protection
 echo "Disabling firewalld (OCI security enforced externally)"
-
-if systemctl list-unit-files | grep -q firewalld.service; then
-  systemctl stop firewalld || true
-  systemctl disable --now firewalld || true
-  systemctl mask firewalld || true
-fi
+systemctl stop firewalld || true
+systemctl disable --now firewalld || true
+systemctl mask firewalld || true
 
 echo "HA networking configured"
 

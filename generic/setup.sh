@@ -123,15 +123,6 @@ echo "HA state saved to $STATE_FILE"
 
 
 
-# OPEN FIREWALL FOR FLOATING IPs
-
-# NOTE: Rocky Linux comes without firewall RPM at all
-#sudo firewall-cmd --permanent --add-service=http
-#sudo firewall-cmd --permanent --add-service=https
-#sudo firewall-cmd --reload
-
-
-
 # main entry point
 
 echo "Setting up DRBD..."
