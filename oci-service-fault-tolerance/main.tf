@@ -123,6 +123,7 @@ resource "oci_core_instance" "node1" {
         service_hostname    = var.service_hostname
         nsg_ocid            = oci_core_network_security_group.ha_nsg.id
         volume_ocid         = oci_core_volume.drbd_volume_1.id
+	ha_cluster_password = var.ha_cluster_password
       }
     ))
   }
@@ -169,6 +170,7 @@ resource "oci_core_instance" "node2" {
         service_hostname    = var.service_hostname
         nsg_ocid            = oci_core_network_security_group.ha_nsg.id
         volume_ocid         = oci_core_volume.drbd_volume_2.id
+        ha_cluster_password = var.ha_cluster_password
       }
     ))
   }
