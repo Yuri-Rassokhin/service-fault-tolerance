@@ -12,9 +12,6 @@ global {
 }
 EOF
 
-# clean up any previous DRBD, if any
-umount ${DRBD_DEVICE} || true
-drbdadm down "${DRBD_RESOURCE}" || true
 wipefs -fa "${BLOCK_DEVICE}"
 
 # Get local IP from OCI metadata
@@ -47,30 +44,8 @@ resource ${DRBD_RESOURCE} {
 }
 EOF
 
-echo "Spinning up DRBD device"
-# spin up DRBD device
-drbdadm create-md --force ${DRBD_RESOURCE}
-drbdadm up ${DRBD_RESOURCE} || true
-drbdadm status ${DRBD_RESOURCE} || true
-
-echo "Preparing mount point for DRBD device"
-# prepare mount point for DRBD device
-mkdir -p "${MOUNT_POINT}"
-chown -R "$USER:$USER" "${MOUNT_POINT}"
-
-echo "Node role according to HA state file: $ROLE"
 if [[ "$ROLE" == "primary" ]]; then
-  echo "Promoting current node to primary"
-  drbdadm primary --force ${DRBD_RESOURCE}
-
-  if ! blkid ${DRBD_DEVICE} >/dev/null 2>&1; then
-    echo "Creating filesystem"
-    mkfs -t ${FS_TYPE} ${DRBD_DEVICE}
-  fi
-
-  if ! mountpoint -q "${MOUNT_POINT}"; then
-    mount ${DRBD_DEVICE} "${MOUNT_POINT}"
-  fi
-else
-  echo "Current node is secondary, skipping filesystem setup"
+	echo "Initializing DRBD metadata on Primary"
+	drbdadm create-md --force ${DRBD_RESOURCE}
 fi
+
