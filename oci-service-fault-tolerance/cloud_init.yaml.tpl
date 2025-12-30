@@ -20,6 +20,7 @@ write_files:
       ############################
       CLUSTER_NAME=ha-drbd
       NODE_COUNT=2
+      HA_CLUSTER_PASSWORD=${ha_cluster_password}
 
       NODE_NAME=${node_name}
       PEER_NODE_NAME=${peer_node_name}
