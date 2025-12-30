@@ -58,17 +58,7 @@ echo "Preparing mount point for DRBD device"
 mkdir -p "${MOUNT_POINT}"
 chown -R "$USER:$USER" "${MOUNT_POINT}"
 
-# Define who's Primary and who's Secondary
-# We use simple lexicographical ordering to avoid ambiguity / race conditions
-# This guarantees idempotency, too
-if [[ "$NODE_NAME" < "$PEER_NODE_NAME" ]]; then
-  ROLE="primary"
-else
-  ROLE="secondary"
-fi
-
-echo "Node role: $ROLE"
-
+echo "Node role according to HA state file: $ROLE"
 if [[ "$ROLE" == "primary" ]]; then
   echo "Promoting current node to primary"
   drbdadm primary --force ${DRBD_RESOURCE}

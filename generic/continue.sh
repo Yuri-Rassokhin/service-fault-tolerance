@@ -4,32 +4,33 @@ exec >> /var/log/ha-bootstrap.log 2>&1
 
 echo "Post-reboot HA bootstrap started"
 
-# Enable DRBD driver
+# Enable DRBD driver persistently
 modprobe drbd
 lsmod | grep drbd
+echo drbd > /etc/modules-load.d/drbd.conf
 
-# Network configuration
-bash /opt/ha/drbd/network.sh
+CONFIG_PATH="/opt/ha"
 
-# Block Volume
-bash /opt/ha/storage.sh
-
-# Determine and configure Floating IP
-bash /opt/ha/floating-ip/determine.sh
-
-# Configure and start DRBD device
-bash /opt/ha/drbd/drbd.sh
-
-# 4. Corosync + Pacemaker
-#bash /opt/ha/sources/cluster.sh
-
+# Distinguish node role for the subsequent steps - either primary or secondary
+bash ${CONFIG_PATH}/node-role.sh
+# Configure network
+bash ${CONFIG_PATH}/drbd/network.sh
+# Configure block volume
+bash ${CONFIG_PATH}/storage.sh
+# Determine and configure floating IP
+bash ${CONFIG_PATH}/floating-ip/determine.sh
+# Configure and spin up DRBD device
+bash ${CONFIG_PATH}/drbd/drbd.sh
+# Configure and launch Pacemaker and Corosync
+bash ${CONFIG_PATH}/pacemaker.sh
 # 5. Floating IP (OCI API, instance principal)
 #bash /opt/ha/sources/floating-ip.sh
 
-# Finally, mark creation of DRBD to avoid re-creating it from scratch every time node reboots
+# Finally, guarantee idempotency:
+# 1. Mark that DRBD is launched to avoid creating it from scratch every time node reboots
 mkdir -p /var/lib/ha
 touch /var/lib/ha/bootstrap.done
-# Remove HA bootstrap service to prevent it from accidental launch - it is VERY disruptive
+# 2. Wipe out HA bootstrap service to prevent it from accidental launch - which would destory all data
 systemctl disable ha-bootstrap.service || true
 rm -f /etc/systemd/system/ha-bootstrap.service
 systemctl daemon-reload

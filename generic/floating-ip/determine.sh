@@ -6,13 +6,6 @@ export OCI_CLI_AUTH=instance_principal
 
 source /etc/ha/stack.env
 
-# Only Primary node determines Service IP to avoid race erros in OCI CLI IP command
-if [[ "$NODE_NAME" < "$PEER_NODE_NAME" ]]; then
-  ROLE="primary"
-else
-  ROLE="secondary"
-fi
-
 if [[ "$ROLE" = "primary" ]]; then
 
 	echo "Primary node ${NODE_NAME} is determining and assigning floating private IP"
