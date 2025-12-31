@@ -5,10 +5,32 @@ exec >> /var/log/ha-bootstrap.log 2>&1
 STATE_FILE="/etc/ha/stack.env"
 source "$STATE_FILE"
 
-echo "Setting Pacemaker and Corosync"
-# Persist and spin up pacemaker
-systemctl enable pcsd
-systemctl start pcsd
+
+# TODO: remove hard-wired block volume path
+# Make Pacemaker start ONLY after iSCSI has block volume mounted, otherwise DRBD will go panic
+echo "Set systemd ordering for corosync/pacemaker (wait for iSCSI and device)"
+mkdir -p /etc/systemd/system/corosync.service.d
+mkdir -p /etc/systemd/system/pacemaker.service.d
+# corosync after iSCSI and after the device appears
+cat > /etc/systemd/system/corosync.service.d/override.conf <<EOF
+[Unit]
+Wants=network-online.target iscsid.service iscsi.service dev-oracleoci-oraclevdb.device
+After=network-online.target iscsid.service iscsi.service dev-oracleoci-oraclevdb.device
+EOF
+# pacemaker after corosync and after the device appears
+cat > /etc/systemd/system/pacemaker.service.d/override.conf <<EOF
+[Unit]
+Wants=corosync.service dev-oracleoci-oraclevdb.device
+After=corosync.service dev-oracleoci-oraclevdb.device
+EOF
+systemctl daemon-reload
+# Firstly, iSCSI - and we're waiting for the device to appear
+systemctl enable --now iscsid iscsi
+udevadm settle
+test -b /dev/oracleoci/oraclevdb
+# Secondly, pcsd (and only pcsd)
+systemctl enable --now pcsd
+
 # Set password for pacemaker cluster
 echo "hacluster:${HA_CLUSTER_PASSWORD}" | chpasswd
 pcs client local-auth -u hacluster -p "${HA_CLUSTER_PASSWORD}"
@@ -16,15 +38,17 @@ pcs client local-auth -u hacluster -p "${HA_CLUSTER_PASSWORD}"
 # On Primary node, configure HA resources and policies
 if [[ "$ROLE" == "primary" ]]; then
 	echo "Configuring HA policies"
-	pcs host auth ${NODE_NAME} ${PEER_NODE_NAME} -u hacluster -p "${HA_CLUSTER_PASSWORD}"
+	# in case the peer node comes with a delay, we'll do graceful wait period
+	for i in {1..30}; do
+		pcs host auth "${NODE_NAME}" "${PEER_NODE_NAME}" -u hacluster -p "${HA_CLUSTER_PASSWORD}" && break
+		sleep 2
+	done
 	pcs cluster setup "${CLUSTER_NAME}" ${NODE_NAME} ${PEER_NODE_NAME} --force
 	pcs cluster start --all
-	pcs status corosync
-	pcs status pcsd
 	pcs cluster enable --all
 	pcs property set stonith-enabled=false
 	pcs property set two_node=1
-	pcs property set no-quorum-policy=ignore
+	pcs property set no-quorum-policy=stop
 	pcs property set cluster-recheck-interval=5s
 	pcs status
 	echo "Configuring HA resources"
@@ -36,7 +60,9 @@ if [[ "$ROLE" == "primary" ]]; then
 	pcs constraint order promote drbd_${DRBD_RESOURCE}-clone then start fs_${DRBD_RESOURCE}
 	echo "waiting 20 seconds for DRBD resource to come under Cosorync control..."
 	sleep 20
-	pcs status
+	pcs status --full
 fi
 
 echo "HA cluster has been configured"
+
+
