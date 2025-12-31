@@ -44,6 +44,11 @@ resource ${DRBD_RESOURCE} {
 }
 EOF
 
-echo "Initializing DRBD metadata"
+echo "Initializing DRBD device"
 drbdadm create-md --force ${DRBD_RESOURCE}
+drbdadm up ${DRBD_RESOURCE}
+echo "Promoting primary JUST ONCE to create groud truth for Pacemaker to take over from"
+if [[ "$ROLE" = "primary" ]]; then
+	drbdadm primary --force ${DRBD_RESOURCE}
+fi
 
