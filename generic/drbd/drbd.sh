@@ -50,5 +50,6 @@ drbdadm up ${DRBD_RESOURCE}
 echo "Promoting primary JUST ONCE to create groud truth for Pacemaker to take over from"
 if [[ "$ROLE" = "primary" ]]; then
 	drbdadm primary --force ${DRBD_RESOURCE}
+	mkfs -t ${FS_TYPE} ${DRBD_DEVICE}
 fi
 
