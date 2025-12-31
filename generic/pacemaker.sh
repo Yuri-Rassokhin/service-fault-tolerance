@@ -44,6 +44,8 @@ if [[ "$ROLE" == "primary" ]]; then
 		sleep 2
 	done
 	pcs cluster setup "${CLUSTER_NAME}" ${NODE_NAME} ${PEER_NODE_NAME} --force
+	sleep 10 # a little hard-coded wait period for the peer node
+	pcs cluster stop --all
 	pcs quorum update last_man_standing=1 wait_for_all=1 # TODO: analyze if it's safe enough
 	pcs cluster start --all
 	pcs cluster enable --all
