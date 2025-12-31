@@ -44,10 +44,10 @@ if [[ "$ROLE" == "primary" ]]; then
 		sleep 2
 	done
 	pcs cluster setup "${CLUSTER_NAME}" ${NODE_NAME} ${PEER_NODE_NAME} --force
+	pcs quorum update last_man_standing=1 wait_for_all=1 # TODO: analyze if it's safe enough
 	pcs cluster start --all
 	pcs cluster enable --all
 	pcs property set stonith-enabled=false
-	pcs property set two_node=1
 	pcs property set no-quorum-policy=stop
 	pcs property set cluster-recheck-interval=5s
 	pcs status
@@ -62,6 +62,13 @@ if [[ "$ROLE" == "primary" ]]; then
 	sleep 20
 	pcs status --full
 fi
+
+# on both nodes, after cluster setup may have happened
+for i in {1..60}; do
+  [[ -f /etc/corosync/corosync.conf ]] && break
+  sleep 1
+done
+systemctl enable --now corosync pacemaker
 
 echo "HA cluster has been configured"
 
