@@ -4,7 +4,7 @@ exec >> /var/log/ha-bootstrap.log 2>&1
 
 export OCI_CLI_AUTH=instance_principal
 
-STATE_FILE="/etc/ha/state.env"
+STATE_FILE="/etc/ha/stack.env"
 
 if [ ! -f "$STATE_FILE" ]; then
   echo "Fatal: HA state file $STATE_FILE not found"
