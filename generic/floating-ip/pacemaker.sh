@@ -2,6 +2,15 @@
 
 . /usr/lib/ocf/lib/ocf-shellfuncs
 
+STATE_FILE="/etc/ha/state.env"
+
+if [ ! -f "$STATE_FILE" ]; then
+  echo "Fatal: HA state file $STATE_FILE not found"
+  exit 1
+fi
+
+source "${STATE_FILE}"
+
 
 
 log() {

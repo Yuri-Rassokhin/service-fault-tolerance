@@ -4,14 +4,18 @@ exec >> /var/log/ha-bootstrap.log 2>&1
 
 export OCI_CLI_AUTH=instance_principal
 
-source /etc/ha/stack.env
+STATE_FILE="/etc/ha/stack.env"
+
+if [ ! -f "$STATE_FILE" ]; then
+  echo "Fatal: HA state file $STATE_FILE not found"
+  exit 1
+fi
+
+source "$STATE_FILE"
 
 if [[ "$ROLE" = "primary" ]]; then
 
 	echo "Primary node ${NODE_NAME} is determining and assigning floating private IP"
-
-	# Load HA context
-	source /etc/ha/stack.env
 
 	METADATA="http://169.254.169.254/opc/v2"
 	AUTH_HEADER="Authorization: Bearer Oracle"
@@ -75,11 +79,38 @@ EOF
 
 	# Persist floating IP in HA status file
 	KEY="SERVICE_IP"
-	FILE="/etc/ha/stack.env"
-	# Remove existing floating IP, if any
-	sed -i "/^${KEY}=.*/d" "$FILE"
+	# Remove existing entry, if any
+	sed -i "/^${KEY}=.*/d" "$STATE_FILE"
 	# Append fresh value
-	echo "${KEY}=${FREE_IP}" >> "$FILE"
+	echo "${KEY}=${FREE_IP}" >> "$STATE_FILE"
+
+        # Persist OCID of floating IP in HA status file
+        KEY="SERVICE_IP_OCID"
+        # Remove existing entry, if any
+        sed -i "/^${KEY}=.*/d" "$STATE_FILE"
+        # Append fresh value
+        echo "${KEY}=${SERVICE_IP_OCID}" >> "$STATE_FILE"
+
+        # Persist VNIC OCID of floating IP in HA status file
+        KEY="VNIC_OCID"
+        # Remove existing entry, if any
+        sed -i "/^${KEY}=.*/d" "$STATE_FILE"
+        # Append fresh value
+        echo "${KEY}=${VNIC_OCID}" >> "$STATE_FILE"
+
+        # Persist IFACE of floating IP in HA status file
+        KEY="IFACE"
+        # Remove existing entry, if any
+        sed -i "/^${KEY}=.*/d" "$STATE_FILE"
+        # Append fresh value
+        echo "${KEY}=enp0s5" >> "$STATE_FILE"
+
+        # Persist MOVE_SCRIPT of floating IP in HA status file
+        KEY="MOVE_SCRIPT"
+        # Remove existing entry, if any
+        sed -i "/^${KEY}=.*/d" "$STATE_FILE"
+        # Append fresh value
+        echo "${KEY}=/usr/local/bin/move_floating_ip.sh" >> "$STATE_FILE"
 
 else
 	echo "Node $NODE_NAME is secondary, it does not have to determine floating IP"

@@ -23,8 +23,8 @@ bash ${CONFIG_PATH}/floating-ip/determine.sh
 bash ${CONFIG_PATH}/drbd/drbd.sh
 # Configure and launch Pacemaker and Corosync
 bash ${CONFIG_PATH}/pacemaker.sh
-# 5. Floating IP (OCI API, instance principal)
-#bash /opt/ha/sources/floating-ip.sh
+# Add floating IP to Pacemaker and Corosync
+bash ${CONFIG_PATH}/floating-ip/setup.sh
 
 # Finally, guarantee idempotency:
 # 1. Mark that DRBD is launched to avoid creating it from scratch every time node reboots
