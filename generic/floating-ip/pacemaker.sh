@@ -1,49 +1,103 @@
 #!/usr/bin/env bash
+# OCF resource agent: ocf:custom:pacemaker
 
-. /usr/lib/ocf/lib/ocf-shellfuncs
+: ${OCF_FUNCTIONS:="${OCF_ROOT}/resource.d/heartbeat/.ocf-shellfuncs"}
+[ -r "${OCF_FUNCTIONS}" ] && . "${OCF_FUNCTIONS}"
 
-STATE_FILE="/etc/ha/state.env"
+STATE_FILE="/etc/ha/stack.env"
 
-if [ ! -f "$STATE_FILE" ]; then
-  echo "Fatal: HA state file $STATE_FILE not found"
-  exit 1
-fi
+load_state() {
+  if [[ ! -f "$STATE_FILE" ]]; then
+    ocf_log err "Fatal: HA state file $STATE_FILE not found"
+    return $OCF_ERR_INSTALLED
+  fi
 
-source "${STATE_FILE}"
+  # shellcheck disable=SC1090
+  source "$STATE_FILE"
 
-
-
-log() {
-  ocf_log info "$1"
+  # Обязательные переменные, которые должны быть в stack.env
+  : "${SERVICE_IP:?SERVICE_IP missing in $STATE_FILE}"
+  : "${IFACE:?IFACE missing in $STATE_FILE}"
+  : "${MOVE_SCRIPT:?MOVE_SCRIPT missing in $STATE_FILE}"
 }
 
+meta_data() {
+  cat <<'EOF'
+<?xml version="1.0"?>
+<resource-agent name="pacemaker" version="1.0">
+  <version>1.1</version>
+  <longdesc lang="en">
+Custom resource agent to move OCI floating secondary private IP to the active node.
+Runs a helper script (MOVE_SCRIPT) and verifies IP presence on IFACE.
+  </longdesc>
+  <shortdesc lang="en">OCI floating IP mover</shortdesc>
 
+  <parameters>
+    <parameter name="state_file">
+      <longdesc lang="en">Path to HA state env file</longdesc>
+      <shortdesc lang="en">State file</shortdesc>
+      <content type="string" default="/etc/ha/stack.env"/>
+    </parameter>
+  </parameters>
 
-case "$1" in
-  start)
-    log "Starting floating IP ${SERVICE_IP} on ${IFACE}"
-    ${MOVE_SCRIPT} || exit $OCF_ERR_GENERIC
+  <actions>
+    <action name="start" timeout="20s"/>
+    <action name="stop" timeout="20s"/>
+    <action name="monitor" timeout="10s" interval="10s"/>
+    <action name="validate-all" timeout="10s"/>
+    <action name="meta-data" timeout="5s"/>
+  </actions>
+</resource-agent>
+EOF
+}
+
+# Позволим переопределить state_file через параметр ресурса
+# pcs resource create floating-ip ocf:custom:pacemaker state_file=/etc/ha/stack.env
+: "${OCF_RESKEY_state_file:=$STATE_FILE}"
+STATE_FILE="$OCF_RESKEY_state_file"
+
+start() {
+  load_state || exit $?
+
+  ocf_log info "Starting floating IP ${SERVICE_IP} on ${IFACE}"
+  "${MOVE_SCRIPT}" || exit $OCF_ERR_GENERIC
+  exit $OCF_SUCCESS
+}
+
+stop() {
+  load_state || exit $?
+
+  ocf_log info "Stopping floating IP ${SERVICE_IP} on ${IFACE}"
+  ip addr del "${SERVICE_IP}/24" dev "${IFACE}" 2>/dev/null || true
+  # TODO: make netmask a parameter, remove hardcoded value
+  exit $OCF_SUCCESS
+}
+
+monitor() {
+  load_state || exit $?
+
+  ip addr show dev "${IFACE}" | grep -qw "${SERVICE_IP}"
+  if [[ $? -eq 0 ]]; then
     exit $OCF_SUCCESS
-    ;;
+  else
+    exit $OCF_NOT_RUNNING
+  fi
+}
 
-  stop)
-    log "Stopping floating IP ${SERVICE_IP} on ${IFACE}"
-    ip addr del ${SERVICE_IP}/24 dev ${IFACE} 2>/dev/null || true
-    exit $OCF_SUCCESS
-    ;;
+validate_all() {
+  load_state || exit $?
 
-  monitor)
-    ip addr show dev ${IFACE} | grep -qw "${SERVICE_IP}"
-    if [[ $? -eq 0 ]]; then
-      exit $OCF_SUCCESS
-    else
-      exit $OCF_NOT_RUNNING
-    fi
-    ;;
+  command -v ip >/dev/null 2>&1 || { ocf_log err "ip command not found"; exit $OCF_ERR_INSTALLED; }
+  [[ -x "${MOVE_SCRIPT}" ]] || { ocf_log err "MOVE_SCRIPT not executable: ${MOVE_SCRIPT}"; exit $OCF_ERR_INSTALLED; }
 
-  *)
-    echo "Usage: $0 {start|stop|monitor}"
-    exit $OCF_ERR_UNIMPLEMENTED
-    ;;
+  exit $OCF_SUCCESS
+}
+
+case "${1:-}" in
+  meta-data) meta_data; exit $OCF_SUCCESS ;;
+  validate-all) validate_all ;;
+  start) start ;;
+  stop) stop ;;
+  monitor) monitor ;;
+  *) echo "Usage: $0 {start|stop|monitor|validate-all|meta-data}"; exit $OCF_ERR_UNIMPLEMENTED ;;
 esac
-
