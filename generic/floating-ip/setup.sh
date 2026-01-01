@@ -17,11 +17,12 @@ echo "Setting floating IP ${SERVICE_IP} on the serice hostname '${SERVICE_HOSTNA
 
 AGENT_DIR="/usr/lib/ocf/resource.d/custom"
 mkdir -p ${AGENT_DIR}
+CONFIG_PATH="/opt/ha"
 
-sudo cp ./floating-ip/move.sh ${MOVE_SCRIPT}
+sudo cp ${CONFIG_PATH}/floating-ip/move.sh ${MOVE_SCRIPT}
 sudo chmod +x ${MOVE_SCRIPT}
 
-sudo cp ${SOURCES}/floating-ip/pacemaker.sh ${AGENT_DIR}/pacemaker
+sudo cp ${CONFIG_PATH}/floating-ip/pacemaker.sh ${AGENT_DIR}/pacemaker
 sudo chmod +x ${AGENT_DIR}/pacemaker
 
 sudo pcs resource create floating-ip ocf:custom:pacemaker op monitor interval=10s timeout=5s
