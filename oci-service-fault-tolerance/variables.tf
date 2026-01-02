@@ -85,11 +85,11 @@ variable "mount_point" {
 
 variable "fs_type" {
   type    = string
-  default = "XFS"
+  default = "xfs"
 
   validation {
-    condition = contains(["XFS", "ext4"], var.fs_type)
-    error_message = "Filesystem must be either XFS or ext4"
+    condition = contains(["xfs", "ext4"], var.fs_type)
+    error_message = "Filesystem must be either xfs or ext4"
   }
 }
 
