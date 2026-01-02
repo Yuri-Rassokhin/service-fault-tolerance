@@ -74,7 +74,10 @@ data "oci_dns_zones" "private_zones" {
 }
 
 locals {
-  resilient_zone_name = "resilient."
+  resilient_zone_name = "resilient.oci."
+}
+
+locals {
   existing_resilient_zone = try(
     one([
       for z in data.oci_dns_zones.private_zones.zones :
