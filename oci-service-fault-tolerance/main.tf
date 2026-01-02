@@ -68,10 +68,6 @@ locals {
 # DNS record
 ############################
 
-locals {
-  resilient_zone_name = "resilient."
-}
-
 data "oci_dns_zones" "private_zones" {
   compartment_id = var.compartment_ocid
   scope          = "PRIVATE"
