@@ -56,6 +56,13 @@ variables:
 
   shape:
     title: "Compute Shape"
+    description: "OCI compute shape for fault-tolerant instance"
+    type: enum
+    enum:
+      - VM.Standard.E5.Flex
+      - VM.Standard.E4.Flex
+      - VM.Standard3.Flex
+    default: VM.Standard.E5.Flex
 
   ocpus:
     title: "OCPUs"

@@ -49,6 +49,16 @@ variable "region" {
 variable "shape" {
   type    = string
   default = "VM.Standard.E5.Flex"
+
+  validation {
+    condition = contains([
+      "VM.Standard.E4.Flex",
+      "VM.Standard.E5.Flex",
+      "VM.Standard3.Flex"
+    ], var.compute_shape)
+
+    error_message = "Unsupported compute shape selected"
+  }
 }
 
 variable "ocpus" {
@@ -75,7 +85,7 @@ variable "mount_point" {
 
 variable "fs_type" {
   type    = string
-  default = "xfs"
+  default = "XFS"
 
   validation {
     condition = contains(["XFS", "ext4"], var.fs_type)
