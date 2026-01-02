@@ -76,6 +76,11 @@ variable "mount_point" {
 variable "fs_type" {
   type    = string
   default = "xfs"
+
+  validation {
+    condition = contains(["XFS", "ext4"], var.fs_type)
+    error_message = "Filesystem must be either XFS or ext4"
+  }
 }
 
 variable "service_hostname" {

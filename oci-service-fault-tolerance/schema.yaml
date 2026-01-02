@@ -68,6 +68,12 @@ variables:
 
   fs_type:
     title: "Filesystem"
+    description: "Filesystem for fault-tolerant storage"
+    type: enum
+    enum:
+      - XFS
+      - ext4
+    default: XFS
 
   mount_point:
     title: "Mount Point"
