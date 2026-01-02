@@ -78,10 +78,14 @@ data "oci_dns_zones" "private_zones" {
 }
 
 locals {
-  existing_resilient_zone = one([
-    for z in data.oci_dns_zones.private_zones.zones :
-    z if z.name == local.resilient_zone_name
-  ], null)
+  resilient_zone_name = "resilient."
+  existing_resilient_zone = try(
+    one([
+      for z in data.oci_dns_zones.private_zones.zones :
+      z if z.name == local.resilient_zone_name
+    ]),
+    null
+  )
 }
 
 resource "oci_dns_zone" "resilient" {
