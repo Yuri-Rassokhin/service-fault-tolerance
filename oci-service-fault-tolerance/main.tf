@@ -65,6 +65,49 @@ locals {
 }
 
 ############################
+# DNS record
+############################
+
+locals {
+  resilient_zone_name = "resilient."
+}
+
+data "oci_dns_zones" "private_zones" {
+  compartment_id = var.compartment_ocid
+  scope          = "PRIVATE"
+}
+
+locals {
+  existing_resilient_zone = one([
+    for z in data.oci_dns_zones.private_zones.zones :
+    z if z.name == local.resilient_zone_name
+  ], null)
+}
+
+resource "oci_dns_zone" "resilient" {
+  count          = local.existing_resilient_zone == null ? 1 : 0
+
+  compartment_id = var.compartment_ocid
+  name           = local.resilient_zone_name
+  zone_type      = "PRIMARY"
+  scope          = "PRIVATE"
+
+  freeform_tags = {
+    managed-by = "terraform"
+    stack      = "ha-drbd"
+  }
+
+}
+
+locals {
+  resilient_zone_ocid = (
+    local.existing_resilient_zone != null
+    ? local.existing_resilient_zone.id
+    : oci_dns_zone.resilient[0].id
+  )
+}
+
+############################
 # Block Volumes
 ############################
 
@@ -123,6 +166,8 @@ resource "oci_core_instance" "node1" {
         service_hostname    = var.service_hostname
         nsg_ocid            = oci_core_network_security_group.ha_nsg.id
         volume_ocid         = oci_core_volume.drbd_volume_1.id
+	dns_zone_ocid       = local.resilient_zone_ocid
+	dns_zone_name       = local.resilient_zone_name
       }
     ))
   }
@@ -169,6 +214,8 @@ resource "oci_core_instance" "node2" {
         service_hostname    = var.service_hostname
         nsg_ocid            = oci_core_network_security_group.ha_nsg.id
         volume_ocid         = oci_core_volume.drbd_volume_2.id
+        dns_zone_ocid       = local.resilient_zone_ocid
+        dns_zone_name       = local.resilient_zone_name
       }
     ))
   }
@@ -191,3 +238,4 @@ resource "oci_core_volume_attachment" "attach2" {
   attachment_type = "iscsi"
   device          = "/dev/oracleoci/oraclevdb"
 }
+

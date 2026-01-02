@@ -47,6 +47,8 @@ write_files:
       SERVICE_HOSTNAME=${service_hostname}
       SERVICE_PORT=80
       FLOATING_IP_MODE=secondary-private-ip
+      DNS_ZONE_OCID=${dns_zone_ocid}
+      DNS_ZONE_NAME=${dns_zone_name}
 
       ############################
       # Auth model
