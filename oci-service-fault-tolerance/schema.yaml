@@ -1,5 +1,5 @@
 title: "Fault Tolerant Compute Resource on OCI"
-description: "Compute instance and storage that are tolerant to any failure and provide continuous availability"
+description: "Fault tolerant compute instance with strictly POSIX-compliant local storage and HTTP access"
 
 schemaVersion: 1.1.0
 
@@ -32,10 +32,6 @@ variableGroups:
       - service_hostname
       - ssh_public_key
 
-  - title: "Access Credentials"
-    variables:
-      - ha_cluster_password
-
 variables:
 
   region:
@@ -66,9 +62,6 @@ variables:
 
   memory_gbs:
     title: "Memory (GB)"
-
-  ha_cluster_password:
-    title: "Fault-Tolerant Cluster Password"
 
   block_volume_size_gbs:
     title: "Raw Size (GB)"

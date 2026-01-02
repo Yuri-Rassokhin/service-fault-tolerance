@@ -83,11 +83,6 @@ variable "service_hostname" {
   default = "fault-tolerant-service"
 }
 
-variable "ha_cluster_password" {
-  type = string
-  default = "MyStrongPassword"
-}
-
 variable "tenancy_ocid" {
   type = string
   description = "Tenancy OCID, required for dynamic group and network operations"
