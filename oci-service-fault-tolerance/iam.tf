@@ -42,6 +42,7 @@ resource "oci_identity_policy" "ha_nodes_policy" {
     "Allow dynamic-group ${oci_identity_dynamic_group.ha_nodes.name} to manage virtual-network-family in compartment id ${var.compartment_ocid}",
     "Allow dynamic-group ${oci_identity_dynamic_group.ha_nodes.name} to manage instance-family in compartment id ${var.compartment_ocid}",
     "Allow dynamic-group ${oci_identity_dynamic_group.ha_nodes.name} to manage volume-attachments in compartment id ${var.compartment_ocid}",
-    "Allow dynamic-group ${oci_identity_dynamic_group.ha_nodes.name} to manage volumes in compartment id ${var.compartment_ocid}"
+    "Allow dynamic-group ${oci_identity_dynamic_group.ha_nodes.name} to manage volumes in compartment id ${var.compartment_ocid}",
+    "Allow dynamic-group ${oci_identity_dynamic_group.ha_nodes.name} to manage dns in compartment id ${var.compartment_ocid}"
   ]
 }
