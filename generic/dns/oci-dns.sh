@@ -3,8 +3,16 @@
 # ocf:custom:oci-dns
 #
 
-OCF_ROOT=${OCF_ROOT:-/usr/lib/ocf}
-. ${OCF_ROOT}/lib/ocf-shellfuncs
+: "${OCF_ROOT:=/usr/lib/ocf}"
+
+if [[ -r "${OCF_ROOT}/resource.d/heartbeat/.ocf-shellfuncs" ]]; then
+  . "${OCF_ROOT}/resource.d/heartbeat/.ocf-shellfuncs"
+elif [[ -r "${OCF_ROOT}/resource.d/pacemaker/.ocf-shellfuncs" ]]; then
+  . "${OCF_ROOT}/resource.d/pacemaker/.ocf-shellfuncs"
+else
+  echo "Cannot find OCF shell funcs" >&2
+  exit 1
+fi
 
 STATE_FILE="/etc/ha/stack.env"
 
