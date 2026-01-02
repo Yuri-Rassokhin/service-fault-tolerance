@@ -86,9 +86,11 @@ resource "oci_dns_zone" "resilient" {
 ############################
 
 locals {
-  resilient_zone_ocid = local.existing_resilient_zone != null
+  resilient_zone_ocid = (
+    local.existing_resilient_zone != null
     ? local.existing_resilient_zone.id
     : oci_dns_zone.resilient[0].id
+  )
 }
 
 ############################
