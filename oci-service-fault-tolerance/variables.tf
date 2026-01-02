@@ -55,7 +55,7 @@ variable "shape" {
       "VM.Standard.E4.Flex",
       "VM.Standard.E5.Flex",
       "VM.Standard3.Flex"
-    ], var.compute_shape)
+    ], var.shape)
 
     error_message = "Unsupported compute shape selected"
   }
