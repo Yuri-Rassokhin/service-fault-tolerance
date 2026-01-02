@@ -49,6 +49,7 @@ write_files:
       FLOATING_IP_MODE=secondary-private-ip
       DNS_ZONE_OCID=${dns_zone_ocid}
       DNS_ZONE_NAME=${dns_zone_name}
+      DNS_VIEW_OCID=${dns_view_ocid}
 
       ############################
       # Auth model

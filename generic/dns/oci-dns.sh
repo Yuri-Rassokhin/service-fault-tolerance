@@ -109,8 +109,15 @@ dns_upsert() {
 
   oci dns record zone patch \
     --zone-name-or-id "$DNS_ZONE_OCID" \
-    --scope "$OCF_RESKEY_scope" \
-    --items "[{\"domain\":\"${FQDN}\",\"rtype\":\"A\",\"rdata\":\"${SERVICE_IP}\",\"ttl\":${OCF_RESKEY_ttl},\"operation\":\"ADD\"}]" \
+    --view-id "$DNS_VIEW_OCID" \
+    --scope PRIVATE \
+    --items "[{
+      \"domain\":\"${FQDN}\",
+      \"rtype\":\"A\",
+      \"rdata\":\"${SERVICE_IP}\",
+      \"ttl\":${OCF_RESKEY_ttl},
+      \"operation\":\"ADD\"
+    }]" \
     --force >/dev/null
 }
 
@@ -119,14 +126,22 @@ dns_delete() {
 
   oci dns record zone patch \
     --zone-name-or-id "$DNS_ZONE_OCID" \
-    --scope "$OCF_RESKEY_scope" \
-    --items "[{\"domain\":\"${FQDN}\",\"rtype\":\"A\",\"rdata\":\"${SERVICE_IP}\",\"ttl\":${OCF_RESKEY_ttl},\"operation\":\"REMOVE\"}]" \
+    --view-id "$DNS_VIEW_OCID" \
+    --scope PRIVATE \
+    --items "[{
+      \"domain\":\"${FQDN}\",
+      \"rtype\":\"A\",
+      \"rdata\":\"${SERVICE_IP}\",
+      \"ttl\":${OCF_RESKEY_ttl},
+      \"operation\":\"REMOVE\"
+    }]" \
     --force >/dev/null || true
 }
 
 monitor_record() {
   oci dns record domain get \
     --zone-name-or-id "$DNS_ZONE_OCID" \
+    --view-id "$DNS_VIEW_OCID" \
     --domain "$FQDN" \
     --rtype A \
     --query "data.items[].rdata" \

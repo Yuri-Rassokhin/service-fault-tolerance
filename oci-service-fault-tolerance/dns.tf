@@ -93,6 +93,10 @@ locals {
   )
 }
 
+locals {
+  dns_view_ocid = oci_dns_view.resilient.id
+}
+
 ############################
 # Outputs to HA stack
 ############################

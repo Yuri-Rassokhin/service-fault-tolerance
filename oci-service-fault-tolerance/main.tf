@@ -125,6 +125,7 @@ resource "oci_core_instance" "node1" {
         volume_ocid         = oci_core_volume.drbd_volume_1.id
 	dns_zone_ocid       = local.resilient_zone_ocid
 	dns_zone_name       = local.resilient_zone_name
+	dns_view_ocid       = local.dns_view_ocid
       }
     ))
   }
@@ -173,6 +174,7 @@ resource "oci_core_instance" "node2" {
         volume_ocid         = oci_core_volume.drbd_volume_2.id
         dns_zone_ocid       = local.resilient_zone_ocid
         dns_zone_name       = local.resilient_zone_name
+        dns_view_ocid       = local.dns_view_ocid
       }
     ))
   }
