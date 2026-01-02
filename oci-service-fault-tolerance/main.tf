@@ -68,13 +68,51 @@ locals {
 # DNS record
 ############################
 
-data "oci_dns_zones" "private_zones" {
+############################
+# PRIVATE DNS (resilient.oci.)
+############################
+
+data "oci_dns_views" "private_views" {
   compartment_id = var.compartment_ocid
-  scope          = "PRIVATE"
 }
 
 locals {
+  resilient_view_name = "resilient-view"
   resilient_zone_name = "resilient.oci."
+}
+
+locals {
+  existing_resilient_view = try(
+    one([
+      for v in data.oci_dns_views.private_views.views :
+      v if v.display_name == local.resilient_view_name
+    ]),
+    null
+  )
+}
+
+resource "oci_dns_view" "resilient" {
+  count          = local.existing_resilient_view == null ? 1 : 0
+  compartment_id = var.compartment_ocid
+  display_name   = local.resilient_view_name
+
+  freeform_tags = {
+    managed-by = "terraform"
+    stack      = "ha-drbd"
+  }
+}
+
+locals {
+  resilient_view_ocid = (
+    local.existing_resilient_view != null
+    ? local.existing_resilient_view.id
+    : oci_dns_view.resilient[0].id
+  )
+}
+
+data "oci_dns_zones" "private_zones" {
+  compartment_id = var.compartment_ocid
+  scope          = "PRIVATE"
 }
 
 locals {
@@ -94,12 +132,12 @@ resource "oci_dns_zone" "resilient" {
   name           = local.resilient_zone_name
   zone_type      = "PRIMARY"
   scope          = "PRIVATE"
+  view_id        = local.resilient_view_ocid
 
   freeform_tags = {
     managed-by = "terraform"
     stack      = "ha-drbd"
   }
-
 }
 
 locals {
