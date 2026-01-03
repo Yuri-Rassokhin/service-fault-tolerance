@@ -13,27 +13,25 @@ fi
 
 source "$STATE_FILE"
 
-if [[ "$ROLE" = "primary" ]]; then
+echo "Primary node ${NODE_NAME} is determining and assigning floating private IP"
 
-	echo "Primary node ${NODE_NAME} is determining and assigning floating private IP"
+METADATA="http://169.254.169.254/opc/v2"
+AUTH_HEADER="Authorization: Bearer Oracle"
 
-	METADATA="http://169.254.169.254/opc/v2"
-	AUTH_HEADER="Authorization: Bearer Oracle"
+# Get instance + VNIC context
+INSTANCE_OCID=$(curl -s -H "$AUTH_HEADER" "$METADATA/instance/" | jq -r '.id')
+VNIC_OCID=$(curl -s -H "$AUTH_HEADER" "$METADATA/vnics/" | jq -r '.[0].vnicId')
 
-	# Get instance + VNIC context
-	INSTANCE_OCID=$(curl -s -H "$AUTH_HEADER" "$METADATA/instance/" | jq -r '.id')
-	VNIC_OCID=$(curl -s -H "$AUTH_HEADER" "$METADATA/vnics/" | jq -r '.[0].vnicId')
+echo "Instance OCID: $INSTANCE_OCID"
+echo "VNIC OCID: $VNIC_OCID"
 
-	echo "Instance OCID: $INSTANCE_OCID"
-	echo "VNIC OCID: $VNIC_OCID"
+# Collect used IPs in subnet
+USED_IPS=$(oci network private-ip list --subnet-id "$SUBNET_OCID" --query 'data[]."ip-address"' --raw-output)
 
-	# Collect used IPs in subnet
-	USED_IPS=$(oci network private-ip list --subnet-id "$SUBNET_OCID" --query 'data[]."ip-address"' --raw-output)
+SUBNET_CIDR=$(oci network subnet get --subnet-id "$SUBNET_OCID" --query 'data."cidr-block"' --raw-output)
 
-	SUBNET_CIDR=$(oci network subnet get --subnet-id "$SUBNET_OCID" --query 'data."cidr-block"' --raw-output)
-
-	# Find free IP in subnet
-	FREE_IP=$(python3 - <<EOF
+# Find free IP in subnet
+FREE_IP=$(python3 - <<EOF
 import ipaddress
 
 subnet = ipaddress.ip_network("$SUBNET_CIDR")
@@ -52,66 +50,63 @@ for ip in subnet.hosts():
 EOF
 )
 
-	if [[ -z "$FREE_IP" ]]; then
-	  echo "Error: No free IPs left in subnet"
-	  exit 1
-	fi
-
-	echo "Selected floating IP: $FREE_IP"
-
-	# Check if IP already exists somewhere
-	SERVICE_IP_OCID=$(oci network private-ip list --subnet-id "$SUBNET_OCID" --query "data[?\"ip-address\"=='$FREE_IP'].id | [0]" --raw-output)
-
-	if [[ -n "$SERVICE_IP_OCID" && "$SERVICE_IP_OCID" != "null" ]]; then
-  		echo "Detaching existing private IP $FREE_IP (OCID=$SERVICE_IP_OCID)"
-  		oci network private-ip delete --private-ip-id "$SERVICE_IP_OCID" --force
-	fi
-
-	# Assign IP to our VNIC
-	SERVICE_IP_OCID=$(oci network vnic assign-private-ip --vnic-id "$VNIC_OCID" --ip-address "$FREE_IP" --query 'data.id' --raw-output)
-
-	if [[ -z "$SERVICE_IP_OCID" || "$SERVICE_IP_OCID" == "null" ]]; then
-  		echo "Error: failed to assign floating IP"
-  		exit 1
-	fi
-
-	echo "Assigned floating IP $FREE_IP (OCID=$SERVICE_IP_OCID)"
-
-	# Persist floating IP in HA status file
-	KEY="SERVICE_IP"
-	# Remove existing entry, if any
-	sed -i "/^${KEY}=.*/d" "$STATE_FILE"
-	# Append fresh value
-	echo "${KEY}=${FREE_IP}" >> "$STATE_FILE"
-
-        # Persist OCID of floating IP in HA status file
-        KEY="SERVICE_IP_OCID"
-        # Remove existing entry, if any
-        sed -i "/^${KEY}=.*/d" "$STATE_FILE"
-        # Append fresh value
-        echo "${KEY}=${SERVICE_IP_OCID}" >> "$STATE_FILE"
-
-        # Persist VNIC OCID of floating IP in HA status file
-        KEY="VNIC_OCID"
-        # Remove existing entry, if any
-        sed -i "/^${KEY}=.*/d" "$STATE_FILE"
-        # Append fresh value
-        echo "${KEY}=${VNIC_OCID}" >> "$STATE_FILE"
-
-        # Persist IFACE of floating IP in HA status file
-        KEY="IFACE"
-        # Remove existing entry, if any
-        sed -i "/^${KEY}=.*/d" "$STATE_FILE"
-        # Append fresh value
-        echo "${KEY}=enp0s5" >> "$STATE_FILE"
-
-        # Persist MOVE_SCRIPT of floating IP in HA status file
-        KEY="MOVE_SCRIPT"
-        # Remove existing entry, if any
-        sed -i "/^${KEY}=.*/d" "$STATE_FILE"
-        # Append fresh value
-        echo "${KEY}=/usr/local/bin/move_floating_ip.sh" >> "$STATE_FILE"
-
-else
-	echo "Node $NODE_NAME is secondary, it does not have to determine floating IP"
+if [[ -z "$FREE_IP" ]]; then
+  echo "Error: No free IPs left in subnet"
+  exit 1
 fi
+
+echo "Selected floating IP: $FREE_IP"
+
+# Check if IP already exists somewhere
+SERVICE_IP_OCID=$(oci network private-ip list --subnet-id "$SUBNET_OCID" --query "data[?\"ip-address\"=='$FREE_IP'].id | [0]" --raw-output)
+
+if [[ -n "$SERVICE_IP_OCID" && "$SERVICE_IP_OCID" != "null" ]]; then
+	echo "Detaching existing private IP $FREE_IP (OCID=$SERVICE_IP_OCID)"
+	oci network private-ip delete --private-ip-id "$SERVICE_IP_OCID" --force
+fi
+
+# Assign IP to our VNIC
+SERVICE_IP_OCID=$(oci network vnic assign-private-ip --vnic-id "$VNIC_OCID" --ip-address "$FREE_IP" --query 'data.id' --raw-output)
+
+if [[ -z "$SERVICE_IP_OCID" || "$SERVICE_IP_OCID" == "null" ]]; then
+	echo "Error: failed to assign floating IP"
+	exit 1
+fi
+
+echo "Assigned floating IP $FREE_IP (OCID=$SERVICE_IP_OCID)"
+
+# Persist floating IP in HA status file
+KEY="SERVICE_IP"
+# Remove existing entry, if any
+sed -i "/^${KEY}=.*/d" "$STATE_FILE"
+# Append fresh value
+echo "${KEY}=${FREE_IP}" >> "$STATE_FILE"
+
+# Persist OCID of floating IP in HA status file
+KEY="SERVICE_IP_OCID"
+# Remove existing entry, if any
+sed -i "/^${KEY}=.*/d" "$STATE_FILE"
+# Append fresh value
+echo "${KEY}=${SERVICE_IP_OCID}" >> "$STATE_FILE"
+
+# Persist VNIC OCID of floating IP in HA status file
+KEY="VNIC_OCID"
+# Remove existing entry, if any
+sed -i "/^${KEY}=.*/d" "$STATE_FILE"
+# Append fresh value
+echo "${KEY}=${VNIC_OCID}" >> "$STATE_FILE"
+
+# Persist IFACE of floating IP in HA status file
+KEY="IFACE"
+# Remove existing entry, if any
+sed -i "/^${KEY}=.*/d" "$STATE_FILE"
+# Append fresh value
+echo "${KEY}=enp0s5" >> "$STATE_FILE"
+
+# Persist MOVE_SCRIPT of floating IP in HA status file
+KEY="MOVE_SCRIPT"
+# Remove existing entry, if any
+sed -i "/^${KEY}=.*/d" "$STATE_FILE"
+# Append fresh value
+echo "${KEY}=/usr/local/bin/move_floating_ip.sh" >> "$STATE_FILE"
+
