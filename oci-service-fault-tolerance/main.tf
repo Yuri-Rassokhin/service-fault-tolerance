@@ -133,6 +133,10 @@ resource "oci_core_instance" "node1" {
   }
 }
 
+locals {
+  primary_vnic_ocid = oci_core_instance.ha_node_1.primary_vnic_id
+}
+
 ############################
 # Compute Instance: Node 2
 ############################
