@@ -27,6 +27,11 @@ locals {
   service_ip = local.candidate_ips[0]
 }
 
+resource "oci_core_private_ip" "service_ip" {
+  vnic_id    = oci_core_instance.node1.primary_vnic_id
+  ip_address = local.service_ip
+}
+
 output "service_ip" {
   value = local.service_ip
 }
