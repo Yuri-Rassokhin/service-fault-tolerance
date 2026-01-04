@@ -126,6 +126,7 @@ resource "oci_core_instance" "node1" {
 	dns_zone_ocid       = local.resilient_zone_ocid
 	dns_zone_name       = local.resilient_zone_name
 	dns_view_ocid       = local.dns_view_ocid
+	service_ip         = local.service_ip
       }
     ))
   }
@@ -175,6 +176,7 @@ resource "oci_core_instance" "node2" {
         dns_zone_ocid       = local.resilient_zone_ocid
         dns_zone_name       = local.resilient_zone_name
         dns_view_ocid       = local.dns_view_ocid
+        service_ip         = local.service_ip
       }
     ))
   }

@@ -13,7 +13,7 @@ fi
 
 source "$STATE_FILE"
 
-echo "Primary node ${NODE_NAME} is determining and assigning floating private IP"
+echo "Node ${NODE_NAME} is determining floating private IP"
 
 METADATA="http://169.254.169.254/opc/v2"
 AUTH_HEADER="Authorization: Bearer Oracle"

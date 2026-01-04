@@ -18,7 +18,7 @@ bash ${CONFIG_PATH}/drbd/network.sh
 # Configure block volume
 bash ${CONFIG_PATH}/storage.sh
 # Determine and configure floating IP
-bash ${CONFIG_PATH}/floating-ip/determine.sh
+#bash ${CONFIG_PATH}/floating-ip/determine.sh
 # Configure and spin up DRBD device
 bash ${CONFIG_PATH}/drbd/drbd.sh
 # Configure and launch Pacemaker and Corosync
