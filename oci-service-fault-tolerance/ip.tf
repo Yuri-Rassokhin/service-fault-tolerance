@@ -28,11 +28,15 @@ locals {
 }
 
 resource "oci_core_private_ip" "service_ip" {
-  subnet_ip = var.subnet_ocid
+  subnet_ip = var.subnet_id
   ip_address = local.service_ip
 }
 
 output "service_ip" {
   value = local.service_ip
+}
+
+output "service_ip_ocid" {
+  value = oci_core_private_ip.service_ip.id
 }
 
