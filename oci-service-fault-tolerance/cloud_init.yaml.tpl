@@ -15,35 +15,27 @@ write_files:
   - path: /etc/ha/stack.env
     permissions: "0600"
     content: |
-      ############################
       # Cluster identity
-      ############################
       CLUSTER_NAME=ha-drbd
       NODE_COUNT=2
       HA_CLUSTER_PASSWORD=MyStrongPassword
-
       NODE_NAME=${node_name}
       PEER_NODE_NAME=${peer_node_name}
 
-      ############################
       # Storage (DRBD)
-      ############################
       VOLUME_OCID=${volume_ocid}
       FS_TYPE=${fs_type}
       MOUNT_POINT=${mount_point}
       DRBD_DEVICE=/dev/drbd0
       DRBD_RESOURCE=r0
 
-      ############################
-      # OCI networking context
+      # Networking
       ############################
       REGION=${region}
       SUBNET_OCID=${subnet_ocid}
       NSG_OCID=${nsg_ocid}
 
-      ############################
       # Service exposure
-      ############################
       SERVICE_HOSTNAME=${service_hostname}
       SERVICE_PORT=80
       FLOATING_IP_MODE=secondary_private_ip
@@ -52,11 +44,6 @@ write_files:
       DNS_ZONE_OCID=${dns_zone_ocid}
       DNS_ZONE_NAME=${dns_zone_name}
       DNS_VIEW_OCID=${dns_view_ocid}
-
-      ############################
-      # Auth model
-      ############################
-      USE_INSTANCE_PRINCIPAL=true
 
 runcmd:
   - mkdir -p /etc/ha
