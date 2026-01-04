@@ -32,6 +32,10 @@ resource "oci_core_private_ip" "service_ip" {
   ip_address = local.service_ip
 }
 
+locals {
+  service_ip_ocid = oci_core_private_ip.service_ip.id
+}
+
 output "service_ip" {
   value = local.service_ip
 }
