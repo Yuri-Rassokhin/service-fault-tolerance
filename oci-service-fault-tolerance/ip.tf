@@ -42,6 +42,7 @@ resource "oci_core_private_ip" "service_ip" {
   vnic_id    = local.primary_vnic_ocid
   ip_address = local.service_ip
 }
+
 output "service_ip" {
   value = local.service_ip
 }
