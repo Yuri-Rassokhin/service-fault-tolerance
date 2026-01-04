@@ -25,10 +25,7 @@ locals {
   ]
 
   service_ip = local.candidate_ips[0]
-}
-
-locals {
-  service_ip_ocid = oci_core_private_ip.service_ip.id
+  service_ip_ocid = service_ip.id
 }
 
 output "service_ip" {
@@ -36,6 +33,6 @@ output "service_ip" {
 }
 
 output "service_ip_ocid" {
-  value = oci_core_private_ip.service_ip.id
+  value = local.service_ip_ocid
 }
 
