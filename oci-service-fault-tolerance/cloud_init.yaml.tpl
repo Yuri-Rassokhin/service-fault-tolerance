@@ -48,7 +48,6 @@ write_files:
       SERVICE_PORT=80
       FLOATING_IP_MODE=secondary_private_ip
       SERVICE_IP=${service_ip}
-      SERVICE_IP_OCID=${service_ip_ocid}
       IFACE=enp0s5
       DNS_ZONE_OCID=${dns_zone_ocid}
       DNS_ZONE_NAME=${dns_zone_name}
