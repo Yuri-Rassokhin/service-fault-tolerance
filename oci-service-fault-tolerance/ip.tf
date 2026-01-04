@@ -25,14 +25,9 @@ locals {
   ]
 
   service_ip = local.candidate_ips[0]
-  service_ip_ocid = service_ip.id
 }
 
 output "service_ip" {
   value = local.service_ip
-}
-
-output "service_ip_ocid" {
-  value = local.service_ip_ocid
 }
 

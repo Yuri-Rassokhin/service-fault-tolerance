@@ -39,7 +39,6 @@ write_files:
       SERVICE_HOSTNAME=${service_hostname}
       SERVICE_PORT=80
       SERVICE_IP=${service_ip}
-      SERVICE_IP_OCID=${service_ip_ocid}
       IFACE=enp0s5
       DNS_ZONE_OCID=${dns_zone_ocid}
       DNS_ZONE_NAME=${dns_zone_name}
