@@ -54,7 +54,7 @@ runcmd:
 
   # Fetch HA scripts bundle
   - mkdir -p /opt/ha
-  - curl -fsSL https://codeload.github.com/Yuri-Rassokhin/service-fault-tolerance/tar.gz/refs/heads/main | tar -xz --strip-components=2 -C /opt/ha service-fault-tolerance-main/generic
+  - curl -fsSL https://codeload.github.com/Yuri-Rassokhin/service-fault-tolerance/tar.gz/refs/heads/main | tar -xz --strip-components=2 -C /opt/ha service-fault-tolerance-main/ol
   - chmod +x /opt/ha/*.sh
 
   # Configure HA phase 2 (post-reboot)
@@ -63,5 +63,5 @@ runcmd:
   - systemctl enable ha-bootstrap.service
 
   # Execute HA setup phase 1 (get DRBD-capable kernel and system dependencies)
-  - bash /opt/ha/setup.sh >> /var/log/ha-bootstrap.log 2>&1
+  - bash /opt/ha/dependencies.sh >> /var/log/ha-bootstrap.log 2>&1
 

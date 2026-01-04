@@ -18,9 +18,6 @@ dnf config-manager --enable "ol${OL_MAJOR}_baseos_latest"
 dnf config-manager --enable "ol${OL_MAJOR}_appstream"
 dnf config-manager --enable "ol${OL_MAJOR}_addons"
 
-echo "Enabling OCI CLI tools"
-dnf -y install oci-utils python-oci-cli python3 python3-pip
-
 echo "Enabling ELRepo"
 rpm -e elrepo-release || true
 tee /etc/yum.repos.d/elrepo.repo <<EOF
@@ -31,10 +28,9 @@ enabled=1
 countme=1
 gpgcheck=0
 EOF
-dnf makecache
 
-echo "Installing core HA packages"
-dnf install -y jq git pacemaker corosync pcs resource-agents fence-agents-all iscsi-initiator-utils
+echo "Enabling ystem packages"
+dnf -y install --setopt=timeout=30 --setopt=retries=3 oci-utils python-oci-cli python3 python3-pip jq git pacemaker corosync pcs resource-agents fence-agents-all iscsi-initiator-utils
 
 # Get kernel installed BEFORE DRBD installation
 BEFORE="$(rpm -q kernel-core --qf '%{VERSION}-%{RELEASE}.%{ARCH}\n' | sort)"
@@ -67,12 +63,7 @@ if [[ ! -f "$VMLINUX" ]]; then
 fi
 
 echo "Locking kernel packages in DNF to prevent future updates"
-dnf versionlock add \
-  kernel \
-  kernel-core \
-  kernel-modules \
-  kernel-modules-core \
-  kernel-modules-extra
+dnf versionlock add kernel kernel-core kernel-modules kernel-modules-core kernel-modules-extra
 
 echo "Locking kernel packages hard way in DNF config"
 mkdir -p /etc/dnf/dnf.conf.d
