@@ -28,7 +28,7 @@ locals {
 }
 
 resource "oci_core_private_ip" "service_ip" {
-  subnet_id = var.subnet_id
+  subnet_id = var.subnet_ocid
   ip_address = local.service_ip
 }
 
