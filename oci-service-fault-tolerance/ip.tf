@@ -10,6 +10,11 @@ data "oci_core_private_ips" "used" {
   subnet_id = var.subnet_ocid
 }
 
+data "oci_core_vnic_attachments" "node1" {
+  compartment_id = var.compartment_ocid
+  instance_id    = oci_core_instance.node1.id
+}
+
 locals {
   subnet_cidr = data.oci_core_subnet.target.cidr_block
 
@@ -25,13 +30,18 @@ locals {
   ]
 
   service_ip = local.candidate_ips[0]
+
+  primary_vnic_ocid = one([
+    for v in data.oci_core_vnic_attachments.node1.vnic_attachments :
+    v.vnic_id if v.nic_index == 0
+  ])
+
 }
 
 resource "oci_core_private_ip" "service_ip" {
-  vnic_id    = oci_core_instance.node1.primary_vnic_id
+  vnic_id    = local.primary_vnic_ocid
   ip_address = local.service_ip
 }
-
 output "service_ip" {
   value = local.service_ip
 }
