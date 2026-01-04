@@ -13,20 +13,18 @@ data "oci_core_private_ips" "used" {
 locals {
   subnet_cidr = data.oci_core_subnet.target.cidr_block
 
-  used_ips = [
+  used_ips = toset([
     for ip in data.oci_core_private_ips.used.private_ips :
     ip.ip_address
-  ]
+  ])
 
-  all_ips = [
+  candidate_ips = [
     for i in range(4, 250) :
     cidrhost(local.subnet_cidr, i)
+    if !contains(local.used_ips, cidrhost(local.subnet_cidr, i))
   ]
 
-  service_ip = one([
-    for ip in local.all_ips :
-    ip if !contains(local.used_ips, ip)
-  ])
+  service_ip = local.candidate_ips[0]
 }
 
 output "service_ip" {
