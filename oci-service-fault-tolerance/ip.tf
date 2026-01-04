@@ -29,7 +29,7 @@ locals {
 
 resource "oci_core_private_ip" "service_ip" {
   subnet_id  = var.subnet_ocid
-  vnic_id    = var.primary_vnic_ocid
+  vnic_id    = local.primary_vnic_ocid
   ip_address = local.service_ip
 }
 
