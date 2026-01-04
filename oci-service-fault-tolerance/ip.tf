@@ -27,6 +27,11 @@ locals {
   service_ip = local.candidate_ips[0]
 }
 
+resource "oci_core_private_ip" "service_ip" {
+  subnet_ip = var.subnet_ocid
+  ip_address = local.service_ip
+}
+
 output "service_ip" {
   value = local.service_ip
 }

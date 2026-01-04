@@ -38,7 +38,6 @@ write_files:
       # Service exposure
       SERVICE_HOSTNAME=${service_hostname}
       SERVICE_PORT=80
-      FLOATING_IP_MODE=secondary_private_ip
       SERVICE_IP=${service_ip}
       IFACE=enp0s5
       DNS_ZONE_OCID=${dns_zone_ocid}
