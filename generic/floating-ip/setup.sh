@@ -19,6 +19,7 @@ AGENT_DIR="/usr/lib/ocf/resource.d/custom"
 mkdir -p ${AGENT_DIR}
 CONFIG_PATH="/opt/ha"
 
+MOVE_SCRIPT="/usr/local/bin/move_floating_ip.sh"
 sudo cp ${CONFIG_PATH}/floating-ip/move.sh ${MOVE_SCRIPT}
 sudo chmod +x ${MOVE_SCRIPT}
 

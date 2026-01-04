@@ -6,6 +6,8 @@
 
 STATE_FILE="/etc/ha/stack.env"
 
+MOVE_SCRIPT="/usr/local/bin/move_floating_ip.sh"
+
 load_state() {
   if [[ ! -f "$STATE_FILE" ]]; then
     ocf_log err "Fatal: HA state file $STATE_FILE not found"
