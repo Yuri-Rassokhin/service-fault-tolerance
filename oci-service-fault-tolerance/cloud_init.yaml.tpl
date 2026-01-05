@@ -46,18 +46,19 @@ write_files:
 
 runcmd:
   - |
+    exec >>(tee -a /var/log/ha-bootstrap.log) 2>&1
     set -euxo pipefail
-    echo "$(date -Is) ***** HA STACK BOOTSTRAP STARTED *****" > /var/log/ha-bootstrap.log
+    echo "$(date -Is) ***** HA STACK BOOTSTRAP STARTED *****"
 
-    # Location of HA state file
+    echo "BOOTSTRAP: Creating HA state file /etc/ha/stack.env":
     mkdir -p /etc/ha
     chmod 700 /etc/ha
-    # Get HA bootstrap bundle
+    echo "BOOTSTRAP: Fetching HA bootstrap SW bundle"
     mkdir -p /opt/ha
     curl -fsSL https://codeload.github.com/Yuri-Rassokhin/service-fault-tolerance/tar.gz/refs/heads/main | tar -xz --strip-components=2 -C /opt/ha service-fault-tolerance-main/ol
     chmod +x /opt/ha/*.sh
 
-    # Prepare files of Pacemaker agents to prevent race condition later, when Pacemaker cluster will have started
+    echo "BOOTSTRAP: Deploying Pacemaker agent files to prevent race condition later"
     AGENT_DIR="/usr/lib/ocf/resource.d/custom"
     mkdir -p $${AGENT_DIR}
     chmod 755 "$${AGENT_DIR}"
@@ -74,11 +75,13 @@ runcmd:
     install -m 0755 $${CONFIG_PATH}/dns/oci-dns.sh "$${AGENT_DIR}/oci-dns"
     restorecon -v "$${AGENT_DIR}/oci-dns"
 
+    echo "BOOTSTRAP: Configuring next phase (post-reboot bootstrapping)"
     # Configure HA phase 2 (post-reboot)
     cp /opt/ha/ha-bootstrap.service /etc/systemd/system/ha-bootstrap.service
     systemctl daemon-reload
     systemctl enable ha-bootstrap.service
 
+    echo "BOOTSTRAP: Setting system dependencies, including DRBD-enabled kernel - note that the system will reboot and continue"
     # Execute HA setup phase 1 (get DRBD-capable kernel and system dependencies)
-    bash /opt/ha/dependencies.sh >> /var/log/ha-bootstrap.log 2>&1
+    bash /opt/ha/dependencies.sh
 

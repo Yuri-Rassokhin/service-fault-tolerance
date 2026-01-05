@@ -2,8 +2,6 @@
 set -euo pipefail
 exec >> /var/log/ha-bootstrap.log 2>&1
 
-echo "Configuring system dependencies"
-
 # Get major release number of Oracle Linux
 . /etc/os-release
 OL_MAJOR="${VERSION_ID%%.*}"
@@ -18,7 +16,7 @@ dnf config-manager --enable "ol${OL_MAJOR}_baseos_latest"
 dnf config-manager --enable "ol${OL_MAJOR}_appstream"
 dnf config-manager --enable "ol${OL_MAJOR}_addons"
 
-echo "Enabling ELRepo"
+# Enabling DRBD repo
 rpm -e elrepo-release || true
 tee /etc/yum.repos.d/elrepo.repo <<EOF
 [elrepo]
@@ -29,7 +27,7 @@ countme=1
 gpgcheck=0
 EOF
 
-echo "Enabling ystem packages"
+# Guarantee all needed packages are there
 dnf -y install --setopt=timeout=30 --setopt=retries=3 oci-utils python-oci-cli python3 python3-pip jq git pacemaker corosync pcs resource-agents fence-agents-all iscsi-initiator-utils
 
 # Get kernel installed BEFORE DRBD installation
@@ -62,19 +60,19 @@ if [[ ! -f "$VMLINUX" ]]; then
   exit 1
 fi
 
-echo "Locking kernel packages in DNF to prevent future updates"
+# Locking kernel packages
 dnf versionlock add kernel kernel-core kernel-modules kernel-modules-core kernel-modules-extra
-
-echo "Locking kernel packages hard way in DNF config"
 mkdir -p /etc/dnf/dnf.conf.d
 cat >/etc/dnf/dnf.conf.d/99-no-kernel.conf <<'EOF'
 [main]
 exclude=kernel* kmod*
 EOF
 
+# Set the most recent DRBD-enabled kernel
 grubby --set-default "$VMLINUX"
 echo "Default kernel set to $TARGET_KERNEL"
 
+# Unless that kernel is already running, reboot into it
 if [[ "$(uname -r)" != "$TARGET_KERNEL" ]]; then
   echo "Rebooting into DRBD-compatible kernel"
   reboot

@@ -2,7 +2,7 @@
 set -euo pipefail
 exec >> /var/log/ha-bootstrap.log 2>&1
 
-echo "Post-reboot HA bootstrap started"
+echo "BOOTSTRAP $(date -Is) Post-reboot HA bootstrapping started"
 
 # Enable DRBD driver persistently
 modprobe drbd
@@ -11,23 +11,24 @@ echo drbd > /etc/modules-load.d/drbd.conf
 
 CONFIG_PATH="/opt/ha"
 
-# Distinguish node role for the subsequent steps - either primary or secondary
+echo "BOOTSTRAP $(date -Is) Deciding which node is Primary and which is Secondary"
 bash ${CONFIG_PATH}/node-role.sh
-# Configure network
+echo "BOOTSTRAP $(date -Is) Configuring networking"
 bash ${CONFIG_PATH}/drbd/network.sh
-# Configure block volume
+echo "BOOTSTRAP $(date -Is) Configuring block volume for the future DRBD device"
 bash ${CONFIG_PATH}/storage.sh
-# Determine parameters of Service IP
+echo "BOOTSTRAP $(date -Is) Fetching parameters of Service IP"
 bash ${CONFIG_PATH}/floating-ip/determine.sh
-# Configure and spin up DRBD device
+echo "BOOTSTRAP $(date -Is) Configuring and spinning up DRBD device"
 bash ${CONFIG_PATH}/drbd/drbd.sh
-# Configure and launch Pacemaker and Corosync
+echo "BOOTSTRAP $(date -Is) Configuring and spinning up Pacemaker and Corosync"
 bash ${CONFIG_PATH}/pacemaker.sh
-# Add floating IP to Pacemaker and Corosync
+echo "BOOTSTRAP $(date -Is) Adding Service IP as a resource to Pacemaker"
 bash ${CONFIG_PATH}/floating-ip/setup.sh
-# Add DNS service for floating IP to Pacemaker and Corosync
+echo "BOOTSTRAP $(date -Is) Adding DNS record of Service IP as a resource to Pacemaker"
 bash ${CONFIG_PATH}/dns/setup.sh
 
+echo "BOOTSTRAP $(date -Is) Finally, guarantee idempotency to NOT let this bootstrapping launch accidently again"
 # Finally, guarantee idempotency:
 # 1. Mark that DRBD is launched to avoid creating it from scratch every time node reboots
 mkdir -p /var/lib/ha
@@ -37,4 +38,4 @@ systemctl disable ha-bootstrap.service || true
 rm -f /etc/systemd/system/ha-bootstrap.service
 systemctl daemon-reload
 
-echo "Post-reboot HA bootstrap completed"
+echo "BOOTSTRAP $(date -Is) Post-reboot bootstraping completed, HA configuration completed successfully"
