@@ -29,8 +29,6 @@ log "Configuring and spinning up Pacemaker and Corosync"
 bash ${CONFIG_PATH}/pacemaker.sh
 log "Adding Service IP as a resource to Pacemaker"
 bash ${CONFIG_PATH}/floating-ip/setup.sh
-#log "Adding DNS record of Service IP as a resource to Pacemaker"
-#bash ${CONFIG_PATH}/dns/setup.sh
 
 log "Finally, guarantee idempotency to NOT let this bootstrapping launch accidently again"
 # Finally, guarantee idempotency:

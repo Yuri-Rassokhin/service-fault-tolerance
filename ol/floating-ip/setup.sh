@@ -17,21 +17,16 @@ echo "Setting floating IP ${SERVICE_IP} on the serice hostname '${SERVICE_HOSTNA
 
 AGENT_DIR="/usr/lib/ocf/resource.d/custom"
 mkdir -p ${AGENT_DIR}
-CONFIG_PATH="/opt/ha"
 
-MOVE_SCRIPT="/usr/local/bin/move_floating_ip.sh"
-install -m 0755 ${CONFIG_PATH}/floating-ip/move.sh ${MOVE_SCRIPT}
-restorecon -v "$MOVE_SCRIPT"
-
-install -m 0755 ${CONFIG_PATH}/floating-ip/pacemaker.sh ${AGENT_DIR}/pacemaker
-restorecon -v "${AGENT_DIR}/pacemaker"
+install -m 0755 /opt/ha/floating-ip/reassign-service-ip.sh ${AGENT_DIR}/
 
 if [[ "$ROLE" == "primary" ]]; then
-	pcs resource create floating-ip ocf:custom:pacemaker op monitor interval=10s timeout=5s
-	pcs constraint colocation add floating-ip with fs_${DRBD_RESOURCE} INFINITY
-	pcs constraint order start fs_${DRBD_RESOURCE} then start floating-ip
+	pcs resource create service-ip ocf:custom:reassign-service-ip op monitor interval=10s timeout=5s
+	pcs constraint colocation add service-ip with fs_${DRBD_RESOURCE} INFINITY
+	pcs constraint order start fs_${DRBD_RESOURCE} then start service-ip
 fi
 
+# grace period to wait for Service IP to becoming assigned (to proceed with DNS record consistently)
 sleep 10
 
 echo "Creating DNS record for Service IP"

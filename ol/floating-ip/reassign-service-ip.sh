@@ -6,8 +6,6 @@
 
 STATE_FILE="/etc/ha/stack.env"
 
-MOVE_SCRIPT="/usr/local/bin/move_floating_ip.sh"
-
 load_state() {
   if [[ ! -f "$STATE_FILE" ]]; then
     ocf_log err "Fatal: HA state file $STATE_FILE not found"
@@ -20,7 +18,9 @@ load_state() {
   # Обязательные переменные, которые должны быть в stack.env
   : "${SERVICE_IP:?SERVICE_IP missing in $STATE_FILE}"
   : "${IFACE:?IFACE missing in $STATE_FILE}"
-  : "${MOVE_SCRIPT:?MOVE_SCRIPT missing in $STATE_FILE}"
+
+  # VNIC of this node, this will be required to grab Service IP
+  VNIC_OCID=$(curl -s -H "Authorization: Bearer Oracle" http://169.254.169.254/opc/v2/vnics/ | jq -r '.[0].vnicId')
 }
 
 meta_data() {
@@ -30,7 +30,6 @@ meta_data() {
   <version>1.1</version>
   <longdesc lang="en">
 Custom resource agent to move OCI floating secondary private IP to the active node.
-Runs a helper script (MOVE_SCRIPT) and verifies IP presence on IFACE.
   </longdesc>
   <shortdesc lang="en">OCI floating IP mover</shortdesc>
 
@@ -60,15 +59,16 @@ STATE_FILE="$OCF_RESKEY_state_file"
 
 start() {
   load_state || exit $?
-
   ocf_log info "Starting floating IP ${SERVICE_IP} on ${IFACE}"
-  "${MOVE_SCRIPT}" || exit $OCF_ERR_GENERIC
+  # Assign Service IP in OCI control plane
+  oci network vnic assign-private-ip --ip-address ${SERVICE_IP} --unassign-if-already-assigned --vnic-id ${VNIC_OCID} 2>/dev/null || exit $OCF_ERR_GENERIC
+  # Make Service IP visible in OS
+  ip addr add ${SERVICE_IP}/24 dev ${IFACE} 2>/dev/null || exit $OCF_ERR_GENERIC
   exit $OCF_SUCCESS
 }
 
 stop() {
   load_state || exit $?
-
   ocf_log info "Stopping floating IP ${SERVICE_IP} on ${IFACE}"
   ip addr del "${SERVICE_IP}/24" dev "${IFACE}" 2>/dev/null || true
   # TODO: make netmask a parameter, remove hardcoded value
@@ -90,8 +90,6 @@ validate_all() {
   load_state || exit $?
 
   command -v ip >/dev/null 2>&1 || { ocf_log err "ip command not found"; exit $OCF_ERR_INSTALLED; }
-  [[ -x "${MOVE_SCRIPT}" ]] || { ocf_log err "MOVE_SCRIPT not executable: ${MOVE_SCRIPT}"; exit $OCF_ERR_INSTALLED; }
-
   exit $OCF_SUCCESS
 }
 
