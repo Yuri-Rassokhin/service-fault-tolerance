@@ -4,6 +4,9 @@
 # Manage OCI Private DNS A-record for floating service IP
 #
 
+export OCI_CLI_AUTH=instance_principal
+export OCI_CLI_SUPPRESS_FILE_PERMISSIONS_WARNING=True
+
 : "${OCF_ROOT:=/usr/lib/ocf}"
 
 ###############################################################################
@@ -68,6 +71,8 @@ load_state() {
   # shellcheck disable=SC1090
   source "$STATE_FILE"
 
+  export OCI_CLI_AUTH=instance_principal
+
   : "${OCF_RESKEY_ttl:=30}"
 
   for v in SERVICE_HOSTNAME SERVICE_IP DNS_ZONE_OCID DNS_ZONE_NAME DNS_VIEW_OCID; do
@@ -77,13 +82,16 @@ load_state() {
     fi
   done
 
-  # Ensure FQDN ends with dot
-  FQDN="${SERVICE_HOSTNAME}.${DNS_ZONE_NAME}"
-  [[ "$FQDN" != *"." ]] && FQDN="${FQDN}."
+  FQDN="${SERVICE_HOSTNAME}.${DNS_ZONE_NAME%\.}"
 }
 
 validate_all() {
   load_state
+
+  oci iam region list >/dev/null 2>&1 || {
+    ocf_log err "OCI CLI auth failed (instance principal not working)"
+    exit $OCF_ERR_CONFIGURED
+  }
 
   if ! command -v oci >/dev/null 2>&1; then
     ocf_log err "oci CLI not found"
@@ -98,47 +106,32 @@ validate_all() {
 ###############################################################################
 dns_upsert() {
   ocf_log info "Ensuring DNS A-record ${FQDN} -> ${SERVICE_IP}"
-
-  oci dns record zone patch \
-    --zone-name-or-id "$DNS_ZONE_OCID" \
-    --view-id "$DNS_VIEW_OCID" \
-    --scope PRIVATE \
-    --items "[{
-      \"domain\":\"${FQDN}\",
-      \"rtype\":\"A\",
-      \"rdata\":\"${SERVICE_IP}\",
-      \"ttl\":${OCF_RESKEY_ttl},
-      \"operation\":\"REPLACE\"
-    }]" \
-    --force >/dev/null
+  ITEMS_JSON=$(jq -cn --arg domain "$FQDN" --arg ip "$SERVICE_IP" --argjson ttl 30 \
+  '[{
+    domain: $domain,
+    rtype: "A",
+    rdata: $ip,
+    ttl: $ttl,
+    operation: "ADD"
+  }]')
+  oci dns record zone patch --zone-name-or-id "$DNS_ZONE_OCID" --scope PRIVATE --items "$ITEMS_JSON" >/dev/null
 }
 
 dns_delete() {
   ocf_log info "Removing DNS A-record ${FQDN}"
-
-  oci dns record zone patch \
-    --zone-name-or-id "$DNS_ZONE_OCID" \
-    --view-id "$DNS_VIEW_OCID" \
-    --scope PRIVATE \
-    --items "[{
-      \"domain\":\"${FQDN}\",
-      \"rtype\":\"A\",
-      \"rdata\":\"${SERVICE_IP}\",
-      \"ttl\":${OCF_RESKEY_ttl},
-      \"operation\":\"REMOVE\"
-    }]" \
-    --force >/dev/null || true
+  ITEMS_JSON=$(jq -cn --arg domain "$FQDN" --arg ip "$SERVICE_IP" --argjson ttl 30 \
+  '[{
+    domain: $domain,
+    rtype: "A",
+    rdata: $ip,
+    ttl: $ttl,
+    operation: "REMOVE"
+  }]')
+  oci dns record zone patch --zone-name-or-id "$DNS_ZONE_OCID" --scope PRIVATE --items "$ITEMS_JSON" >/dev/null || true
 }
 
 monitor_record() {
-  oci dns record domain get \
-    --zone-name-or-id "$DNS_ZONE_OCID" \
-    --view-id "$DNS_VIEW_OCID" \
-    --domain "$FQDN" \
-    --rtype A \
-    --query "data.items[].rdata" \
-    --raw-output 2>/dev/null \
-  | grep -qx "$SERVICE_IP"
+  oci dns record zone get --zone-name-or-id "$DNS_ZONE_OCID" --scope PRIVATE --query "data.items[?domain=='${FQDN}' && rtype=='A'].rdata" --raw-output 2>/dev/null | grep -qx "$SERVICE_IP"
 }
 
 ###############################################################################
