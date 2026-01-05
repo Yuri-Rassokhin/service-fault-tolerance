@@ -63,21 +63,11 @@ runcmd:
     curl -fsSL https://codeload.github.com/Yuri-Rassokhin/service-fault-tolerance/tar.gz/refs/heads/main | tar -xz --strip-components=2 -C /opt/ha service-fault-tolerance-main/ol
     chmod +x /opt/ha/*.sh
 
-    log "Deploying Pacemaker agent files to prevent race condition later"
+    log "Deploying Pacemaker agent to manage Service IP"
     AGENT_DIR="/usr/lib/ocf/resource.d/custom"
     mkdir -p $${AGENT_DIR}
     chmod 755 $${AGENT_DIR}
-    CONFIG_PATH="/opt/ha"
-
-    # Agent: Service IP
-    MOVE_SCRIPT="/usr/local/bin/move_floating_ip.sh"
-    install -m 0755 $${CONFIG_PATH}/floating-ip/move.sh $${MOVE_SCRIPT}
-    restorecon -v $${MOVE_SCRIPT}
-    install -m 0755 $${CONFIG_PATH}/floating-ip/reassign-service-ip.sh $${AGENT_DIR}/
-
-    # Agent: DNS
-    install -m 0755 $${CONFIG_PATH}/dns/oci-dns.sh $${AGENT_DIR}/oci-dns
-    restorecon -v $${AGENT_DIR}/oci-dns
+    install -m 0755 /opt/ha/floating-ip/reassign-service-ip $${AGENT_DIR}/
 
     log "Configuring next phase (post-reboot bootstrapping)"
     # Configure HA phase 2 (post-reboot)
