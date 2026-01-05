@@ -72,7 +72,7 @@ runcmd:
     # Agent: Service IP
     MOVE_SCRIPT="/usr/local/bin/move_floating_ip.sh"
     install -m 0755 $${CONFIG_PATH}/floating-ip/move.sh $${MOVE_SCRIPT}
-    restorecon -v $$MOVE_SCRIPT
+    restorecon -v $${MOVE_SCRIPT}
     install -m 0755 $${CONFIG_PATH}/floating-ip/pacemaker.sh $${AGENT_DIR}/pacemaker
     restorecon -v $${AGENT_DIR}/pacemaker
 
