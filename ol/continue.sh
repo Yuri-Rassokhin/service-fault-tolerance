@@ -38,4 +38,4 @@ systemctl disable ha-bootstrap.service || true
 rm -f /etc/systemd/system/ha-bootstrap.service
 systemctl daemon-reload
 
-echo "BOOTSTRAP $(date -Is) Post-reboot bootstraping completed, HA configuration completed successfully"
+echo "BOOTSTRAP $(date -Is) Post-reboot bootstraping completed, Fault Tolerant Compute Resource configured successfully"

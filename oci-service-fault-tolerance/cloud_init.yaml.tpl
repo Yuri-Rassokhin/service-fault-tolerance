@@ -46,7 +46,7 @@ write_files:
 
 runcmd:
   - |
-    exec >>(tee -a /var/log/ha-bootstrap.log) 2>&1
+    exec > >(tee -a /var/log/ha-bootstrap.log) 2>&1
     set -euxo pipefail
     echo "$(date -Is) ***** HA STACK BOOTSTRAP STARTED *****"
 
