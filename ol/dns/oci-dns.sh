@@ -6,7 +6,9 @@
 
 : "${OCF_ROOT:=/usr/lib/ocf}"
 
+###############################################################################
 # Load OCF shell functions
+###############################################################################
 if [[ -r "${OCF_ROOT}/resource.d/heartbeat/.ocf-shellfuncs" ]]; then
   . "${OCF_ROOT}/resource.d/heartbeat/.ocf-shellfuncs"
 elif [[ -r "${OCF_ROOT}/resource.d/pacemaker/.ocf-shellfuncs" ]]; then
@@ -24,13 +26,13 @@ STATE_FILE="/etc/ha/stack.env"
 meta_data() {
 cat <<EOF
 <?xml version="1.0"?>
-<resource-agent name="oci-dns" version="1.0">
-  <version>1.0</version>
+<resource-agent name="oci-dns" version="1.1">
+  <version>1.1</version>
 
   <longdesc lang="en">
-OCF resource agent that manages an OCI *private* DNS A-record for a floating
-service IP. The record is created on start, verified on monitor, and removed
-on stop. Intended to be colocated with a floating IP resource.
+OCF resource agent managing an OCI *private* DNS A-record for a floating
+service IP. The record is created or replaced on start, verified on monitor,
+and removed on stop. Designed for Pacemaker-controlled HA failover.
   </longdesc>
 
   <shortdesc lang="en">OCI Private DNS floating A-record</shortdesc>
@@ -40,12 +42,6 @@ on stop. Intended to be colocated with a floating IP resource.
       <longdesc lang="en">DNS record TTL</longdesc>
       <shortdesc lang="en">TTL</shortdesc>
       <content type="integer" default="30"/>
-    </parameter>
-
-    <parameter name="scope">
-      <longdesc lang="en">DNS zone scope (PRIVATE only is supported)</longdesc>
-      <shortdesc lang="en">Zone scope</shortdesc>
-      <content type="string" default="PRIVATE"/>
     </parameter>
   </parameters>
 
@@ -73,29 +69,25 @@ load_state() {
   source "$STATE_FILE"
 
   : "${OCF_RESKEY_ttl:=30}"
-  : "${OCF_RESKEY_scope:=PRIVATE}"
 
-  FQDN="${SERVICE_HOSTNAME}.${DNS_ZONE_NAME}"
-}
-
-validate_all() {
-  load_state
-
-  for v in SERVICE_HOSTNAME SERVICE_IP DNS_ZONE_OCID DNS_ZONE_NAME; do
+  for v in SERVICE_HOSTNAME SERVICE_IP DNS_ZONE_OCID DNS_ZONE_NAME DNS_VIEW_OCID; do
     if [[ -z "${!v:-}" ]]; then
       ocf_log err "Missing required variable in state file: $v"
       exit $OCF_ERR_CONFIGURED
     fi
   done
 
-  if [[ "$OCF_RESKEY_scope" != "PRIVATE" ]]; then
-    ocf_log err "Only PRIVATE DNS zones are supported"
-    exit $OCF_ERR_CONFIGURED
-  fi
+  # Ensure FQDN ends with dot
+  FQDN="${SERVICE_HOSTNAME}.${DNS_ZONE_NAME}"
+  [[ "$FQDN" != *"." ]] && FQDN="${FQDN}."
+}
+
+validate_all() {
+  load_state
 
   if ! command -v oci >/dev/null 2>&1; then
     ocf_log err "oci CLI not found"
-    exit $OCF_ERR_CONFIGURED
+    exit $OCF_ERR_INSTALLED
   fi
 
   return $OCF_SUCCESS
@@ -105,7 +97,7 @@ validate_all() {
 # DNS operations
 ###############################################################################
 dns_upsert() {
-  ocf_log info "Upserting DNS A-record ${FQDN} -> ${SERVICE_IP}"
+  ocf_log info "Ensuring DNS A-record ${FQDN} -> ${SERVICE_IP}"
 
   oci dns record zone patch \
     --zone-name-or-id "$DNS_ZONE_OCID" \
@@ -116,13 +108,13 @@ dns_upsert() {
       \"rtype\":\"A\",
       \"rdata\":\"${SERVICE_IP}\",
       \"ttl\":${OCF_RESKEY_ttl},
-      \"operation\":\"ADD\"
+      \"operation\":\"REPLACE\"
     }]" \
     --force >/dev/null
 }
 
 dns_delete() {
-  ocf_log info "Deleting DNS A-record ${FQDN} rdata=${SERVICE_IP}"
+  ocf_log info "Removing DNS A-record ${FQDN}"
 
   oci dns record zone patch \
     --zone-name-or-id "$DNS_ZONE_OCID" \
