@@ -32,3 +32,17 @@ if [[ "$ROLE" == "primary" ]]; then
 	pcs constraint order start fs_${DRBD_RESOURCE} then start floating-ip
 fi
 
+sleep 10
+
+echo "Creating DNS record for Service IP"
+FQDN="${SERVICE_HOSTNAME}.${DNS_ZONE_NAME%\.}"
+ITEMS_JSON=$(jq -cn --arg domain "$FQDN" --arg ip "$SERVICE_IP" \
+  '[{
+    domain: $domain,
+    rtype: "A",
+    rdata: $ip,
+    ttl: "86400",
+    operation: "ADD"
+  }]')
+oci dns record zone patch --zone-name-or-id "$DNS_ZONE_OCID" --scope PRIVATE --items "$ITEMS_JSON"
+
