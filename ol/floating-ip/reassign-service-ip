@@ -19,6 +19,8 @@ load_state() {
   : "${SERVICE_IP:?SERVICE_IP missing in $STATE_FILE}"
   : "${IFACE:?IFACE missing in $STATE_FILE}"
 
+  export OCI_CLI_AUTH=instance_principal
+
   # VNIC of this node, this will be required to grab Service IP
   VNIC_OCID=$(curl -s -H "Authorization: Bearer Oracle" http://169.254.169.254/opc/v2/vnics/ | jq -r '.[0].vnicId')
 }
@@ -57,6 +59,56 @@ EOF
 : "${OCF_RESKEY_state_file:=$STATE_FILE}"
 STATE_FILE="$OCF_RESKEY_state_file"
 
+get_this_vnic_ocid() {
+  # Берём VNIC текущего инстанса из Instance Metadata
+  # v2 IMDS требует заголовок Authorization: Bearer Oracle
+  curl -fsS -H "Authorization: Bearer Oracle" \
+    http://169.254.169.254/opc/v2/vnics/ \
+  | jq -r '.[0].vnicId'
+}
+
+get_service_ip_vnic_ocid() {
+  # Узнаём, к какому VNIC привязан наш secondary private IP (по OCID private-ip)
+  # Нужен SERVICE_IP_OCID в /etc/ha/stack.env
+  oci network private-ip get \
+    --private-ip-id "$SERVICE_IP_OCID" \
+    --query 'data."vnic-id"' \
+    --raw-output
+}
+
+monitor() {
+  load_state || exit $?
+
+  # Требуем, чтобы в stack.env был OCID private IP
+  if [[ -z "${SERVICE_IP_OCID:-}" ]]; then
+    ocf_log err "SERVICE_IP_OCID is missing in $STATE_FILE"
+    exit $OCF_ERR_CONFIGURED
+  fi
+
+  # 1) OS-level: есть ли IP на интерфейсе
+  if ! ip -o addr show dev "${IFACE}" | grep -qw "${SERVICE_IP}"; then
+    ocf_log warn "Service IP ${SERVICE_IP} not present on ${IFACE} (OS-level)"
+    exit $OCF_NOT_RUNNING
+  fi
+
+  # 2) OCI-level: привязан ли private-ip к VNIC этого узла
+  local this_vnic service_vnic
+  this_vnic="$(get_this_vnic_ocid 2>/dev/null || true)"
+  service_vnic="$(get_service_ip_vnic_ocid 2>/dev/null || true)"
+
+  if [[ -z "$this_vnic" || -z "$service_vnic" ]]; then
+    ocf_log warn "Unable to determine VNIC ownership (this_vnic='${this_vnic}', service_vnic='${service_vnic}')"
+    exit $OCF_NOT_RUNNING
+  fi
+
+  if [[ "$service_vnic" != "$this_vnic" ]]; then
+    ocf_log warn "Service private IP OCID ${SERVICE_IP_OCID} is on VNIC ${service_vnic}, not on this node VNIC ${this_vnic}"
+    exit $OCF_NOT_RUNNING
+  fi
+
+  exit $OCF_SUCCESS
+}
+
 start() {
   load_state || exit $?
   ocf_log info "Starting floating IP ${SERVICE_IP} on ${IFACE}"
@@ -75,16 +127,16 @@ stop() {
   exit $OCF_SUCCESS
 }
 
-monitor() {
-  load_state || exit $?
-
-  ip addr show dev "${IFACE}" | grep -qw "${SERVICE_IP}"
-  if [[ $? -eq 0 ]]; then
-    exit $OCF_SUCCESS
-  else
-    exit $OCF_NOT_RUNNING
-  fi
-}
+#monitor() {
+#  load_state || exit $?
+#
+#  ip addr show dev "${IFACE}" | grep -qw "${SERVICE_IP}"
+#  if [[ $? -eq 0 ]]; then
+#    exit $OCF_SUCCESS
+#  else
+#    exit $OCF_NOT_RUNNING
+#  fi
+#}
 
 validate_all() {
   load_state || exit $?
