@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# OCF resource agent: ocf:custom:pacemaker
+# OCF resource agent: ocf:custom:reassign-service-ip
 
 : ${OCF_FUNCTIONS:="${OCF_ROOT}/resource.d/heartbeat/.ocf-shellfuncs"}
 [ -r "${OCF_FUNCTIONS}" ] && . "${OCF_FUNCTIONS}"
@@ -26,7 +26,7 @@ load_state() {
 meta_data() {
   cat <<'EOF'
 <?xml version="1.0"?>
-<resource-agent name="pacemaker" version="1.0">
+<resource-agent name="reassign-service-ip" version="1.0">
   <version>1.1</version>
   <longdesc lang="en">
 Custom resource agent to move OCI floating secondary private IP to the active node.
@@ -53,7 +53,7 @@ EOF
 }
 
 # Позволим переопределить state_file через параметр ресурса
-# pcs resource create floating-ip ocf:custom:pacemaker state_file=/etc/ha/stack.env
+# pcs resource create floating-ip ocf:custom:reassign-service-ip state_file=/etc/ha/stack.env
 : "${OCF_RESKEY_state_file:=$STATE_FILE}"
 STATE_FILE="$OCF_RESKEY_state_file"
 
@@ -61,7 +61,7 @@ start() {
   load_state || exit $?
   ocf_log info "Starting floating IP ${SERVICE_IP} on ${IFACE}"
   # Assign Service IP in OCI control plane
-  oci network vnic assign-private-ip --ip-address ${SERVICE_IP} --unassign-if-already-assigned --vnic-id ${VNIC_OCID} 2>/dev/null || exit $OCF_ERR_GENERIC
+  oci network vnic assign-private-ip --ip-address ${SERVICE_IP} --unassign-if-already-assigned --vnic-id ${VNIC_OCID} 2>/dev/null
   # Make Service IP visible in OS
   ip addr add ${SERVICE_IP}/24 dev ${IFACE} 2>/dev/null || exit $OCF_ERR_GENERIC
   exit $OCF_SUCCESS
