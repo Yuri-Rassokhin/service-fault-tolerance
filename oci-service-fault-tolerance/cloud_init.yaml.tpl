@@ -59,20 +59,20 @@ runcmd:
 
     # Prepare files of Pacemaker agents to prevent race condition later, when Pacemaker cluster will have started
     AGENT_DIR="/usr/lib/ocf/resource.d/custom"
-    mkdir -p ${AGENT_DIR}
-    chmod 755 "${AGENT_DIR}"
+    mkdir -p $${AGENT_DIR}
+    chmod 755 "$${AGENT_DIR}"
     CONFIG_PATH="/opt/ha"
 
     # Agent: Service IP
     MOVE_SCRIPT="/usr/local/bin/move_floating_ip.sh"
-    install -m 0755 ${CONFIG_PATH}/floating-ip/move.sh ${MOVE_SCRIPT}
-    restorecon -v "$MOVE_SCRIPT"
-    install -m 0755 ${CONFIG_PATH}/floating-ip/pacemaker.sh ${AGENT_DIR}/pacemaker
-    restorecon -v "${AGENT_DIR}/pacemaker"
+    install -m 0755 $${CONFIG_PATH}/floating-ip/move.sh $${MOVE_SCRIPT}
+    restorecon -v "$$MOVE_SCRIPT"
+    install -m 0755 $${CONFIG_PATH}/floating-ip/pacemaker.sh $${AGENT_DIR}/pacemaker
+    restorecon -v "$${AGENT_DIR}/pacemaker"
 
     # Agent: DNS
-    install -m 0755 ${CONFIG_PATH}/dns/oci-dns.sh "${AGENT_DIR}/oci-dns"
-    restorecon -v "${AGENT_DIR}/oci-dns"
+    install -m 0755 $${CONFIG_PATH}/dns/oci-dns.sh "$${AGENT_DIR}/oci-dns"
+    restorecon -v "$${AGENT_DIR}/oci-dns"
 
     # Configure HA phase 2 (post-reboot)
     cp /opt/ha/ha-bootstrap.service /etc/systemd/system/ha-bootstrap.service
