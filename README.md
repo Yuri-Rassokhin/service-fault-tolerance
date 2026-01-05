@@ -1,6 +1,6 @@
 # Service Fault Tolerance
 
-This is an OCI Resource Manager stack that turns your conventional application to a fault tolerant service in a few clicks.
+This is an OCI Resource Manager stack that turns your conventional application to a fault tolerant, geographically distributed service in a few clicks.
 It deployes OCI Compute Instance with a local storage (XFS or ext4) that is synchronously mirrored to remote clone.
 In case of a failure, it switches over to the remote clone instantly.
 Therefore, it provides contunuous service with zero data loss and zero data delay.
@@ -30,7 +30,7 @@ The architecture intentionally spins around DRBD which defines its features.
 1. Active/Passive HA.
 2. Synchronous storage replication, aka mirroring.
 3. Remote mirroring across OCI datacenters (aka Availability Domains) is fine - within limits of the speed of light.
-4. Genuine POSIX behavious of a local filesystem (XFS, ext4), including deterministic performance of fsync() and such, as opposed to emulatation provided by shared filesystems.
+4. Genuine POSIX behaviour of a local filesystem (XFS, ext4), including deterministic performance of fsync() and such, as opposed to emulatation provided by shared filesystems.
 5. Very low latency and performance overhead.
 
 ## What it is NOT?
