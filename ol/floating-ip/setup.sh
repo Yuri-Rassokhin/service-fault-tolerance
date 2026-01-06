@@ -16,7 +16,7 @@ source "$STATE_FILE"
 echo "Setting floating IP ${SERVICE_IP} on the serice hostname '${SERVICE_HOSTNAME}'"
 
 if [[ "$ROLE" == "primary" ]]; then
-	pcs resource create service-ip ocf:custom:reassign-service-ip op monitor interval=10s timeout=5s
+	pcs resource create service-ip ocf:custom:reassign-service-ip op monitor interval=3s timeout=2s
 	pcs constraint colocation add service-ip with fs_${DRBD_RESOURCE} INFINITY
 	pcs constraint order start fs_${DRBD_RESOURCE} then start service-ip
 fi
