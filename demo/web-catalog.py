@@ -25,7 +25,7 @@ def root():
     html = f"""
     <html>
     <head>
-        <title>HA Service</title>
+        <title>Fault Tolerant Service</title>
         <style>
             body {{
                 font-family: monospace;
@@ -41,9 +41,8 @@ def root():
         </style>
     </head>
     <body>
-        <h2>HA FastAPI Service</h2>
-        <b>Node:</b> {hostname}<br>
-        <b>Service IP:</b> bound via Pacemaker<br>
+        <h2>Fault Tolerant Service</h2>
+        <b>Active Node:</b> {hostname}<br>
         <b>Directory:</b> /resilient
         <br><br>
         <pre>
