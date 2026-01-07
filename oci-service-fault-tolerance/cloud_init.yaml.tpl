@@ -86,10 +86,9 @@ runcmd:
     fi
 
     log "Deploying agent file(s)"
-    AGENT_DIR="/usr/lib/ocf/resource.d/custom"
-    install -d -m 755 $${AGENT_DIR}
-    install -m 0755 /opt/ha/floating-ip/reassign-service-ip $${AGENT_DIR}/
-    restorecon -Rv "${AGENT_DIR}" || true
+    install -d -m 755 /usr/lib/ocf/resource.d/custom
+    install -m 0755 /opt/ha/floating-ip/reassign-service-ip /usr/lib/ocf/resource.d/custom/
+    restorecon -Rv "/usr/lib/ocf/resource.d/custom" || true
 
     log "Preparing phase 2 (post-reboot SW configuration)"
     cp /opt/ha/ha-bootstrap.service /etc/systemd/system/ha-bootstrap.service
