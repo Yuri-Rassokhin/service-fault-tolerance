@@ -123,7 +123,6 @@ stop() {
   load_state || exit $?
   ocf_log info "Stopping floating IP ${SERVICE_IP} on ${IFACE}"
   ip addr del "${SERVICE_IP}/${SERVICE_PREFIXLEN}" dev "${IFACE}" 2>/dev/null || true
-  # TODO: make netmask a parameter, remove hardcoded value
   exit $OCF_SUCCESS
 }
 
