@@ -68,20 +68,10 @@ runcmd:
     log "Ensuring persmissions for state directory /etc/ha/"
     install -d -m 700 /etc/ha
 
-    log "Checking if state file exists and has proper permissions"
+    log "Checking if state file exists"
     STATE="/etc/ha/stack.env"
     if [[ ! -f "$STATE" ]]; then
         log "$STATE missing, aborting"
-        exit 1
-    fi
-    PERM="$(stat -c '%a' "$STATE")"
-    OWNER="$(stat -c '%U' "$STATE")"
-    if [[ "$OWNER" != "root" ]]; then
-        log "$STATE must be owned by root while found $OWNER, aborting"
-        exit 1
-    fi
-    if (( (PERM & 022) != 0 )); then
-        log "$STATE permissions too permissive ($PERM), aborting"
         exit 1
     fi
 
