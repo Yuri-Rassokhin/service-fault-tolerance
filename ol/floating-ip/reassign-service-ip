@@ -115,14 +115,14 @@ start() {
   # Assign Service IP in OCI control plane
   oci network vnic assign-private-ip --ip-address ${SERVICE_IP} --unassign-if-already-assigned --vnic-id ${VNIC_OCID} 2>/dev/null
   # Make Service IP visible in OS
-  ip addr add ${SERVICE_IP}/24 dev ${IFACE} 2>/dev/null || exit $OCF_ERR_GENERIC
+  ip addr add ${SERVICE_IP}/${SERVICE_PREFIXLEN} dev ${IFACE} 2>/dev/null || exit $OCF_ERR_GENERIC
   exit $OCF_SUCCESS
 }
 
 stop() {
   load_state || exit $?
   ocf_log info "Stopping floating IP ${SERVICE_IP} on ${IFACE}"
-  ip addr del "${SERVICE_IP}/24" dev "${IFACE}" 2>/dev/null || true
+  ip addr del "${SERVICE_IP}/${SERVICE_PREFIXLEN}" dev "${IFACE}" 2>/dev/null || true
   # TODO: make netmask a parameter, remove hardcoded value
   exit $OCF_SUCCESS
 }

@@ -17,5 +17,5 @@ source "${STATE_FILE}"
 VNIC_OCID=$(curl -s -H "Authorization: Bearer Oracle" http://169.254.169.254/opc/v2/vnics/ | jq -r '.[0].vnicId')
 oci network vnic assign-private-ip --ip-address ${SERVICE_IP} --unassign-if-already-assigned --vnic-id ${VNIC_OCID}
 # Make it visible in the OS
-ip addr add ${SERVICE_IP}/24 dev ${IFACE} 2>/dev/null || true
+ip addr add ${SERVICE_IP}/${SERVICE_PREFIXLEN} dev ${IFACE} 2>/dev/null || true
 

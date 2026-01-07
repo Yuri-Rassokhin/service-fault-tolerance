@@ -50,3 +50,7 @@ echo "Service IP OCID persisted"
 # Append fresh value
 #echo "${KEY}=${VNIC_OCID}" >> "$STATE_FILE"
 
+# Determine subnet mask of Service IP
+PREFIXLEN=$(curl -s -H "$AUTH_HEADER" "$METADATA/vnics/" | jq -r '.[0].subnetCidrBlock' | cut -d/ -f2)
+echo "SERVICE_PREFIXLEN=${PREFIXLEN}" >> /etc/ha/stack.env
+
