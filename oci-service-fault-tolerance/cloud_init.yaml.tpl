@@ -74,10 +74,10 @@ runcmd:
         log "$STATE missing, aborting"
         exit 1
     fi
-    PERM=$$(stat -c '%a' "$STATE")
-    OWNER=$$(stat -c '%U' "$STATE")
+    PERM="$(stat -c '%a' "$STATE")"
+    OWNER="$(stat -c '%U' "$STATE")"
     if [[ "$OWNER" != "root" ]]; then
-        log "$STATE must be owned by root (found: $OWNER), aborting"
+        log "$STATE must be owned by root while found $OWNER, aborting"
         exit 1
     fi
     if (( (PERM & 022) != 0 )); then
