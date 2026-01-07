@@ -24,6 +24,7 @@ write_files:
 
       # Storage (DRBD)
       VOLUME_OCID=${volume_ocid}
+      BLOCK_DEVICE=/dev/oracleoci/oraclevdb
       FS_TYPE=${fs_type}
       MOUNT_POINT=${mount_point}
       DRBD_DEVICE=/dev/drbd0
@@ -46,36 +47,55 @@ write_files:
 
 runcmd:
   - |
-    log() {
-      echo "[$(date -Is)] BOOTSTRAP $*"
-    }
-
     exec > >(tee -a /var/log/ha-bootstrap.log) 2>&1
     set -euxo pipefail
-    log "HA bootstrapping started"
+    echo "[$(date -Is)] BOOTSTRAP: Phase 0 started (deploying SW bundle)"
 
-    log "Creating HA state file /etc/ha/stack.env"
-    mkdir -p /etc/ha
-    chmod 700 /etc/ha
-
-    log "Fetching HA bootstrap SW bundle"
+    echo "[$(date -Is)] BOOTSTRAP: Fetching HA bootstrap SW bundle"
     mkdir -p /opt/ha
     curl -fsSL https://codeload.github.com/Yuri-Rassokhin/service-fault-tolerance/tar.gz/refs/heads/main | tar -xz --strip-components=2 -C /opt/ha service-fault-tolerance-main/ol
-    chmod +x /opt/ha/*.sh
+    chmod +x /opt/ha/dependencies.sh
+    chmod +x /opt/ha/floating-ip/reassign-service-ip
 
-    log "Deploying Pacemaker agent to manage Service IP"
+    # Enable utility functions such as log()
+    if [[ -r /opt/ha/util.sh ]]; then
+      source /opt/ha/util.sh
+    else
+      echo "[$(date -Is)] BOOTSTRAP: /opt/ha/util.sh not found, aborting"
+      exit 1
+    fi
+
+    log "Ensuring persmissions for state directory /etc/ha/"
+    install -d -m 700 /etc/ha
+
+    log "Checking if state file exists and has proper permissions"
+    STATE="/etc/ha/stack.env"
+    if [[ ! -f "$STATE" ]]; then
+        log "$STATE missing, aborting"
+        exit 1
+    fi
+    PERM=$$(stat -c '%a' "$STATE")
+    OWNER=$$(stat -c '%U' "$STATE")
+    if [[ "$OWNER" != "root" ]]; then
+        log "$STATE must be owned by root (found: $OWNER), aborting"
+        exit 1
+    fi
+    if (( (PERM & 022) != 0 )); then
+        log "$STATE permissions too permissive ($PERM), aborting"
+        exit 1
+    fi
+
+    log "Deploying agent file(s)"
     AGENT_DIR="/usr/lib/ocf/resource.d/custom"
-    mkdir -p $${AGENT_DIR}
-    chmod 755 $${AGENT_DIR}
+    install -d -m 755 $${AGENT_DIR}
     install -m 0755 /opt/ha/floating-ip/reassign-service-ip $${AGENT_DIR}/
+    restorecon -Rv "${AGENT_DIR}" || true
 
-    log "Configuring next phase (post-reboot bootstrapping)"
-    # Configure HA phase 2 (post-reboot)
+    log "Preparing phase 2 (post-reboot SW configuration)"
     cp /opt/ha/ha-bootstrap.service /etc/systemd/system/ha-bootstrap.service
     systemctl daemon-reload
     systemctl enable ha-bootstrap.service
 
-    log "Setting system dependencies, including DRBD-enabled kernel - note that the system will reboot and continue"
-    # Execute HA setup phase 1 (get DRBD-capable kernel and system dependencies)
+    log "Phase 1 started (configuring kernel and system-level dependencies"
     bash /opt/ha/dependencies.sh
 

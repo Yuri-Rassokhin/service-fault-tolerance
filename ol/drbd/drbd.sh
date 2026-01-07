@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-set -euo pipefail
-exec >> /var/log/ha-bootstrap.log 2>&1
 
-source /etc/ha/stack.env
+# *** Mandatory for proper logging and state consistency ***
+source /opt/ha/util.sh
 
-# Make DRBD commands non-interactive
+
+
+log "Making DRBD commands non-interactive"
 mkdir -p /etc/drbd.d
 tee /etc/drbd.d/global_common.conf <<EOF
 global {
@@ -12,18 +13,17 @@ global {
 }
 EOF
 
+log "Wiping out everything from block device ${BLOCK_DEVICE}"
 wipefs -fa "${BLOCK_DEVICE}"
 
-# Get local IP from OCI metadata
+log "Getting IP address of the nodes"
 LOCAL_IP=$(curl -s -H "Authorization: Bearer Oracle" http://169.254.169.254/opc/v2/vnics | jq -r '.[0].privateIp')
-
 # Get peer IP (via DNS or metadata later)
 # For now assume symmetric naming and /etc/hosts based resolution
 # Placeholder – will be filled by peer node
 PEER_IP=$(getent hosts "${PEER_NODE_NAME}" | awk '{print $1}' || true)
 
-echo "Setting DRBD device configuration file"
-# define configuration of DRBD device
+log "Creating DRBD device configuration file"
 tee /etc/drbd.d/${DRBD_RESOURCE}.res <<EOF
 resource ${DRBD_RESOURCE} {
     protocol C;
@@ -44,10 +44,11 @@ resource ${DRBD_RESOURCE} {
 }
 EOF
 
-echo "Initializing DRBD device"
+log "Initializing DRBD device"
 drbdadm create-md --force ${DRBD_RESOURCE}
+log "Spinning up DRBD device"
 drbdadm up ${DRBD_RESOURCE}
-echo "Promoting primary JUST ONCE to create ground truth for Pacemaker to take over from"
+log "Promoting current node to Primary just once to create ground truth for Pacemaker"
 if [[ "$ROLE" = "primary" ]]; then
 	drbdadm primary --force ${DRBD_RESOURCE}
 	mkfs -t ${FS_TYPE} ${DRBD_DEVICE}

@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-set -euo pipefail
-exec >> /var/log/ha-bootstrap.log 2>&1
+
+# *** Mandatory for proper logging and state consistency ***
+source /opt/ha/util.sh
+
+
 
 # Get major release number of Oracle Linux
 . /etc/os-release
@@ -48,7 +51,7 @@ fi
 
 # If there is no kernel version for DRBD, we can't deploy DRBD at all
 if [[ -z "$TARGET_KERNEL" ]]; then
-  echo "Fatal: unable to determine target kernel for DRBD"
+  log "Unable to determine target kernel for DRBD, aborting"
   exit 1
 fi
 
@@ -56,7 +59,7 @@ fi
 VMLINUX="/boot/vmlinuz-${TARGET_KERNEL}"
 
 if [[ ! -f "$VMLINUX" ]]; then
-  echo "Fatal: kernel image for DRBD not found: $VMLINUX"
+  log "Kernel image $VMLINUX for DRBD not found, aborting"
   exit 1
 fi
 
@@ -70,13 +73,13 @@ EOF
 
 # Set the most recent DRBD-enabled kernel
 grubby --set-default "$VMLINUX"
-echo "Default kernel set to $TARGET_KERNEL"
+log "Default kernel set to $TARGET_KERNEL"
 
 # Unless that kernel is already running, reboot into it
 if [[ "$(uname -r)" != "$TARGET_KERNEL" ]]; then
-  echo "Rebooting into DRBD-compatible kernel"
+  log "Rebooting into DRBD-compatible kernel"
   reboot
 else
-  echo "Already running DRBD-compatible kernel, no reboot required"
+  log "Already running DRBD-compatible kernel, no reboot required"
 fi
 

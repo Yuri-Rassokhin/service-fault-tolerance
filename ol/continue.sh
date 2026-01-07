@@ -1,43 +1,40 @@
 #!/usr/bin/env bash
-set -euo pipefail
-exec >> /var/log/ha-bootstrap.log 2>&1
 
-log() {
-	echo "[$(date -Is)] BOOTSTRAP $*"
-}
+# *** Mandatory for proper logging and state consistency ***
+source /opt/ha/util.sh
 
-log "Post-reboot HA bootstrapping started"
 
-# Enable DRBD driver persistently
+
+log "Phase 2 started (post-reboot SW configuration"
+
+log "Persist DRBD driver after reboot"
 modprobe drbd
 lsmod | grep drbd
 echo drbd > /etc/modules-load.d/drbd.conf
 
-CONFIG_PATH="/opt/ha"
-
+CFG="/opt/ha"
 log "Deciding which node is Primary and which is Secondary"
-bash ${CONFIG_PATH}/node-role.sh
+bash ${CFG}/node-role.sh
 log "Configuring networking"
-bash ${CONFIG_PATH}/drbd/network.sh
+bash ${CFG}/drbd/network.sh
 log "Configuring block volume for the future DRBD device"
-bash ${CONFIG_PATH}/storage.sh
+bash ${CFG}/storage.sh
 log "Fetching parameters of Service IP"
-bash ${CONFIG_PATH}/floating-ip/determine.sh
+bash ${CFG}/floating-ip/determine.sh
 log "Configuring and spinning up DRBD device"
-bash ${CONFIG_PATH}/drbd/drbd.sh
+bash ${CFG}/drbd/drbd.sh
 log "Configuring and spinning up Pacemaker and Corosync"
-bash ${CONFIG_PATH}/pacemaker.sh
+bash ${CFG}/pacemaker.sh
 log "Adding Service IP as a resource to Pacemaker"
-bash ${CONFIG_PATH}/floating-ip/setup.sh
+bash ${CFG}/floating-ip/setup.sh
 
-log "Finally, guarantee idempotency to NOT let this bootstrapping launch accidently again"
-# Finally, guarantee idempotency:
-# 1. Mark that DRBD is launched to avoid creating it from scratch every time node reboots
+log "Wiping out bootstrapping services to prevent them from accidental re-run"
+# Mark that DRBD is launched to avoid creating it from scratch every time node reboots
 mkdir -p /var/lib/ha
 touch /var/lib/ha/bootstrap.done
-# 2. Wipe out HA bootstrap service to prevent it from accidental launch - which would destory all data
+# Wipe out bootstrap service to prevent it from accidental launch - which would destory all data
 systemctl disable ha-bootstrap.service || true
 rm -f /etc/systemd/system/ha-bootstrap.service
 systemctl daemon-reload
 
-log "Post-reboot bootstraping completed, Fault Tolerant Compute Resource configured successfully"
+log "Congratulations! Configuration completed successfully"
