@@ -13,7 +13,7 @@ variableGroups:
     variables:
       - region_single_id
 
-  - title: "Region Selection"
+  - title: "Region Selection (Multi-AD)"
     visibleWhen:
       cross_ad_fault_tolerance: true
     variables:
