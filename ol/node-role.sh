@@ -18,5 +18,5 @@ else
 fi
 log "Determined node role: $ROLE"
 
-state_upsert("ROLE", "$ROLE")
+state_upsert "ROLE" "$ROLE"
 
