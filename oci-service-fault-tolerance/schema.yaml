@@ -125,12 +125,12 @@ variables:
       - USA (Phoenix) – 3 AD
       - USA (San Jose) – 1 AD
 
-region_multi_ad:
+  region_multi_ad:
     type: string
     title: OCI Region (3 AD only)
     description: Regions supporting multi-AD fault tolerance
     dependsOn:
-      cross_ad: true
+      cross_ad_fault_tolerance: true
     enum:
       - ap-singapore-1
       - ap-sydney-1
