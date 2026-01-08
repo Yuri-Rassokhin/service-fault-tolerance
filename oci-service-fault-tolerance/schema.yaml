@@ -50,7 +50,7 @@ variableGroups:
 variables:
 
   region_single_ad:
-    type: string
+    type: enum
     title: OCI Region
     description: Select OCI region for deployment
     enum:
@@ -125,7 +125,7 @@ variables:
       - USA (San Jose) – 1 AD
 
   region_multi_ad:
-    type: string
+    type: enum
     title: OCI Region (3 AD only)
     description: Regions supporting multi-AD fault tolerance
     enum:
