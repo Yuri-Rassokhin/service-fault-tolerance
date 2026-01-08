@@ -7,10 +7,25 @@ locale: "en"
 
 variableGroups:
 
+  - title: "Region Selection"
+    visibleWhen:
+      cross_ad_fault_tolerance: false
+    variables:
+      - region_single_id
+
+  - title: "Region Selection"
+    visibleWhen:
+      cross_ad_fault_tolerance: true
+    variables:
+      - region_multi_id
+
+  - title: "Cross-AD Mode"
+    variables:
+      - cross_ad_fault_tolerance
+
   - title: "Location"
     variables:
       - region
-      - cross_ad_fault_tolerance
       - tenancy_ocid
       - compartment_ocid
       - vcn_ocid
@@ -35,17 +50,105 @@ variableGroups:
 
 variables:
 
-  region:
-    title: "OCI Region"
-    description: "OCI region where the service will be deployed"
-    type: enum
+  region_single_ad:
+    type: string
+    title: OCI Region
+    description: Select OCI region for deployment
     enum:
-      - eu-frankfurt-1
+      - af-johannesburg-1
+      - ap-chuncheon-1
+      - ap-hyderabad-1
+      - ap-melbourne-1
+      - ap-mumbai-1
+      - ap-osaka-1
+      - ap-seoul-1
+      - ap-singapore-1
+      - ap-sydney-1
+      - ap-tokyo-1
+      - ca-montreal-1
+      - ca-toronto-1
       - eu-amsterdam-1
+      - eu-frankfurt-1
+      - eu-madrid-1
+      - eu-marseille-1
+      - eu-milan-1
+      - eu-paris-1
+      - eu-stockholm-1
+      - eu-zurich-1
+      - il-jerusalem-1
+      - me-abudhabi-1
+      - me-dubai-1
+      - me-jeddah-1
+      - me-riyadh-1
+      - mx-monterrey-1
+      - mx-queretaro-1
+      - sa-santiago-1
+      - sa-valparaiso-1
+      - sa-saopaulo-1
+      - uk-london-1
+      - us-ashburn-1
+      - us-phoenix-1
+      - us-sanjose-1
+    enumNames:
+      - South Africa (Johannesburg) – 1 AD
+      - South Korea (Chuncheon) – 1 AD
+      - India (Hyderabad) – 1 AD
+      - Australia (Melbourne) – 1 AD
+      - India (Mumbai) – 1 AD
+      - Japan (Osaka) – 1 AD
+      - South Korea (Seoul) – 1 AD
+      - Singapore (Singapore) – 3 AD
+      - Australia (Sydney) – 3 AD
+      - Japan (Tokyo) – 3 AD
+      - Canada (Montreal) – 1 AD
+      - Canada (Toronto) – 1 AD
+      - Netherlands (Amsterdam) – 1 AD
+      - Germany (Frankfurt) – 3 AD
+      - Spain (Madrid) – 1 AD
+      - France (Marseille) – 1 AD
+      - Italy (Milan) – 1 AD
+      - France (Paris) – 1 AD
+      - Sweden (Stockholm) – 1 AD
+      - Switzerland (Zurich) – 1 AD
+      - Israel (Jerusalem) – 1 AD
+      - UAE (Abu Dhabi) – 1 AD
+      - UAE (Dubai) – 3 AD
+      - Saudi Arabia (Jeddah) – 1 AD
+      - Saudi Arabia (Riyadh) – 1 AD
+      - Mexico (Monterrey) – 1 AD
+      - Mexico (Queretaro) – 1 AD
+      - Chile (Santiago) – 1 AD
+      - Chile (Valparaiso) – 1 AD
+      - Brazil (Sao Paulo) – 1 AD
+      - United Kingdom (London) – 3 AD
+      - USA (Ashburn) – 3 AD
+      - USA (Phoenix) – 3 AD
+      - USA (San Jose) – 1 AD
+
+region_multi_ad:
+    type: string
+    title: OCI Region (3 AD only)
+    description: Regions supporting multi-AD fault tolerance
+    dependsOn:
+      cross_ad: true
+    enum:
+      - ap-singapore-1
+      - ap-sydney-1
+      - ap-tokyo-1
+      - eu-frankfurt-1
       - me-dubai-1
       - uk-london-1
       - us-ashburn-1
       - us-phoenix-1
+    enumNames:
+      - Singapore (Singapore) – 3 AD
+      - Australia (Sydney) – 3 AD
+      - Japan (Tokyo) – 3 AD
+      - Germany (Frankfurt) – 3 AD
+      - UAE (Dubai) – 3 AD
+      - United Kingdom (London) – 3 AD
+      - USA (Ashburn) – 3 AD
+      - USA (Phoenix) – 3 AD
 
   cross_ad_fault_tolerance:
     title: "Cross-AD fault tolerance"
