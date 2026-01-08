@@ -1,5 +1,16 @@
 ### REQUIRED ###
 
+variable "region" {
+  type        = string
+  description = "OCI region code"
+}
+
+variable "cross_ad_fault_tolerance" {
+  type        = bool
+  default     = false
+  description = "Place standby resource in different Availability Domain"
+}
+
 variable "compartment_ocid" {
   description = "Compartment where fault-tolerant cluster will be deployed"
   type        = string

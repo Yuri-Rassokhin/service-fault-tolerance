@@ -10,6 +10,7 @@ variableGroups:
   - title: "Location"
     variables:
       - region
+      - cross_ad_fault_tolerance
       - tenancy_ocid
       - compartment_ocid
       - vcn_ocid
@@ -37,6 +38,19 @@ variables:
   region:
     title: "OCI Region"
     description: "OCI region where the service will be deployed"
+    type: enum
+    enum:
+      - eu-frankfurt-1
+      - eu-amsterdam-1
+      - me-dubai-1
+      - uk-london-1
+      - us-ashburn-1
+      - us-phoenix-1
+
+  cross_ad_fault_tolerance:
+    title: "Cross-AD fault tolerance"
+    type: boolean
+    default: false
 
   tenancy_ocid:
     title: "Tenancy"
