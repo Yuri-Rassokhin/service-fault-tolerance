@@ -7,17 +7,17 @@ locale: "en"
 
 variableGroups:
 
-  - title: "Region Selection"
+  - title: "Region Selection (All Public Regions)"
     visibleWhen:
       cross_ad_fault_tolerance: false
     variables:
-      - region_single_id
+      - region_single_ad
 
-  - title: "Region Selection (Multi-AD)"
+  - title: "Region Selection (Multi-AD Public Regions)"
     visibleWhen:
       cross_ad_fault_tolerance: true
     variables:
-      - region_multi_id
+      - region_multi_ad
 
   - title: "Cross-AD Mode"
     variables:
@@ -25,7 +25,6 @@ variableGroups:
 
   - title: "Location"
     variables:
-      - region
       - tenancy_ocid
       - compartment_ocid
       - vcn_ocid
@@ -129,8 +128,6 @@ variables:
     type: string
     title: OCI Region (3 AD only)
     description: Regions supporting multi-AD fault tolerance
-    dependsOn:
-      cross_ad_fault_tolerance: true
     enum:
       - ap-singapore-1
       - ap-sydney-1
