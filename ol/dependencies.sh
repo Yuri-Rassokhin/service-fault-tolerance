@@ -77,7 +77,7 @@ log "Default kernel set to $TARGET_KERNEL"
 
 # Unless that kernel is already running, reboot into it
 if [[ "$(uname -r)" != "$TARGET_KERNEL" ]]; then
-  log "Rebooting into DRBD-compatible kernel"
+  log "Rebooting into DRBD-compatible kernel $TARGET_KERNEL"
   reboot
 else
   log "Already running DRBD-compatible kernel, no reboot required"

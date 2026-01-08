@@ -22,7 +22,7 @@ write_files:
       NODE_NAME=${node_name}
       PEER_NODE_NAME=${peer_node_name}
 
-      # Storage (DRBD)
+      # Media for fault-tolerant storage
       VOLUME_OCID=${volume_ocid}
       BLOCK_DEVICE=/dev/oracleoci/oraclevdb
       FS_TYPE=${fs_type}
@@ -56,6 +56,7 @@ runcmd:
     curl -fsSL https://codeload.github.com/Yuri-Rassokhin/service-fault-tolerance/tar.gz/refs/heads/main | tar -xz --strip-components=2 -C /opt/ha service-fault-tolerance-main/ol
     chmod +x /opt/ha/dependencies.sh
     chmod +x /opt/ha/floating-ip/reassign-service-ip
+    chmod +x /opt/ha/continue.sh
 
     # Enable utility functions such as log()
     if [[ -r /opt/ha/util.sh ]]; then
