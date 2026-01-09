@@ -7,14 +7,14 @@ locale: "en"
 
 variableGroups:
 
-  - title: "Region Selection - All Regions"
+  - title: "Region Selection (Single-AD Fault Tolerance"
     visible:
       not:
         - cross_ad_fault_tolerance
     variables:
       - region_single_ad
 
-  - title: "Region Selection - Cross-AD Mode"
+  - title: "Region Selection (Cross-AD Fault Tolerance)"
     visible: cross_ad_fault_tolerance
     variables:
       - region_multi_ad
