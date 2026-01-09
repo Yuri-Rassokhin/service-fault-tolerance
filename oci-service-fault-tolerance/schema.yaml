@@ -9,7 +9,8 @@ variableGroups:
 
   - title: "Region Selection - All Regions"
     visible:
-      not: cross_ad_fault_tolerance
+      not:
+        - cross_ad_fault_tolerance
     variables:
       - region_single_ad
 
