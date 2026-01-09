@@ -7,14 +7,14 @@ locale: "en"
 
 variableGroups:
 
-  - title: "Region Selection (Single-AD Fault Tolerance)"
+  - title: "Region Selection (All Regions)"
     visible:
       not:
         - cross_ad_fault_tolerance
     variables:
       - region_single_ad
 
-  - title: "Region Selection (Cross-AD Fault Tolerance)"
+  - title: "Region Selection (Three-AD Regions Only)"
     visible: cross_ad_fault_tolerance
     variables:
       - region_multi_ad
@@ -146,7 +146,7 @@ variables:
       - USA (Phoenix) – 3 AD
 
   cross_ad_fault_tolerance:
-    title: "Cross-AD Fault Tolerance"
+    title: "Place standby resource in different Availability Domain"
     type: boolean
     default: false
 
