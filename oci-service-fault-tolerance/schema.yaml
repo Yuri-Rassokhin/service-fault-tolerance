@@ -7,9 +7,15 @@ locale: "en"
 
 variableGroups:
 
-  - title: "Region Selection"
+  - title: "Region Selection - All Regions"
+    visible:
+      not: cross_ad_fault_tolerance
     variables:
       - region_single_ad
+
+  - title: "Region Selection - Cross-AD Mode"
+    visible: cross_ad_fault_tolerance
+    variables:
       - region_multi_ad
 
   - title: "Enable Cross-AD Mode"
@@ -45,8 +51,6 @@ variables:
   region_single_ad:
     type: enum
     title: OCI Region
-    visibleWhen:
-      cross_ad_fault_tolerance: false
     enum:
       - af-johannesburg-1
       - ap-chuncheon-1
@@ -121,8 +125,6 @@ variables:
   region_multi_ad:
     type: enum
     title: OCI Region (3 AD only)
-    visibleWhen:
-      cross_ad_fault_tolerance: true      
     enum:
       - ap-singapore-1
       - ap-sydney-1
@@ -143,7 +145,7 @@ variables:
       - USA (Phoenix) – 3 AD
 
   cross_ad_fault_tolerance:
-    title: "Cross-AD fault tolerance"
+    title: "Cross-AD Fault Tolerance"
     type: boolean
     default: false
 
