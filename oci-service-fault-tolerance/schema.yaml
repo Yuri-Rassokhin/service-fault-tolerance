@@ -7,6 +7,10 @@ locale: "en"
 
 variableGroups:
 
+  - title: "Enable Cross-AD Mode"
+    variables:
+      - cross_ad_fault_tolerance
+
   - title: "Region Selection"
     visible:
       not:
@@ -18,10 +22,6 @@ variableGroups:
     visible: cross_ad_fault_tolerance
     variables:
       - region_multi_ad
-
-  - title: "Enable Cross-AD Mode"
-    variables:
-      - cross_ad_fault_tolerance
 
   - title: "Location"
     variables:
@@ -48,6 +48,11 @@ variableGroups:
       - ssh_public_key
 
 variables:
+
+  cross_ad_fault_tolerance:
+    title: "Place standby resource in different Availability Domain"
+    type: boolean
+    default: false
 
   region_single_ad:
     type: enum
@@ -144,11 +149,6 @@ variables:
       - United Kingdom (London) – 3 AD
       - USA (Ashburn) – 3 AD
       - USA (Phoenix) – 3 AD
-
-  cross_ad_fault_tolerance:
-    title: "Place standby resource in different Availability Domain"
-    type: boolean
-    default: false
 
   tenancy_ocid:
     title: "Tenancy"
