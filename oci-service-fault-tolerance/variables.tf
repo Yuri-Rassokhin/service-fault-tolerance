@@ -8,7 +8,6 @@ variable "region" {
 variable "cross_ad_fault_tolerance" {
   type        = bool
   default     = false
-  description = "Place standby resource in different Availability Domain"
 }
 
 variable "compartment_ocid" {

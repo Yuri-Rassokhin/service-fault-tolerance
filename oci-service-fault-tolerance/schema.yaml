@@ -7,14 +7,14 @@ locale: "en"
 
 variableGroups:
 
-  - title: "Region Selection (All Regions)"
+  - title: "Region Selection"
     visible:
       not:
         - cross_ad_fault_tolerance
     variables:
       - region_single_ad
 
-  - title: "Region Selection (Three-AD Regions Only)"
+  - title: "Region Selection"
     visible: cross_ad_fault_tolerance
     variables:
       - region_multi_ad
@@ -51,7 +51,7 @@ variables:
 
   region_single_ad:
     type: enum
-    title: OCI Region
+    title: OCI Region (All Regions)
     enum:
       - af-johannesburg-1
       - ap-chuncheon-1
@@ -125,7 +125,7 @@ variables:
 
   region_multi_ad:
     type: enum
-    title: OCI Region (3 AD only)
+    title: OCI Region (Three-AD only)
     enum:
       - ap-singapore-1
       - ap-sydney-1
