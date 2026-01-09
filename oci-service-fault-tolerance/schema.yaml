@@ -15,8 +15,7 @@ variableGroups:
       - region_single_ad
 
   - title: "Region Selection (Cross-AD Fault Tolerance)"
-    visible:
-      - cross_ad_fault_tolerance
+    visible: cross_ad_fault_tolerance
     variables:
       - region_multi_ad
 
