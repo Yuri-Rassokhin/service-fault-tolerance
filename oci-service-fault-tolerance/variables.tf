@@ -26,6 +26,21 @@ variable "vcn_ocid" {
     condition = length(trimspace(var.vcn_ocid)) > 0
     error_message = "VCN OCID is required"
   }
+  pattern: "^ocid1.vcn\\..+"
+
+}
+
+data "oci_core_vcn" "selected" {
+  vcn_id = var.vcn_ocid
+}
+
+locals {
+  vcn_region = data.oci_core_vcn.selected.region
+}
+
+validation {
+  condition     = local.vcn_region == var.region
+  error_message = "Selected VCN does not belong to the chosen region (${var.region})"
 }
 
 variable "subnet_ocid" {
@@ -35,7 +50,30 @@ variable "subnet_ocid" {
     condition = length(trimspace(var.subnet_ocid)) > 0
     error_message = "Subnet OCID is required"
   }
+  pattern: "^ocid1.subnet\\..+"
 }
+
+data "oci_core_subnet" "selected" {
+  subnet_id = var.subnet_ocid
+}
+
+validation {
+  condition     = data.oci_core_subnet.selected.vcn_id == var.vcn_ocid
+  error_message = "Subnet does not belong to the selected VCN"
+}
+
+validation {
+  condition = (
+    var.cross_ad_fault_tolerance == false ||
+    (
+      var.cross_ad_fault_tolerance == true &&
+      local.subnet_ad != null
+    )
+  )
+  error_message = "Cross-AD mode requires subnets explicitly bound to an Availability Domain"
+}
+
+
 
 variable "ssh_public_key" {
   description = "SSH public key to access fault tolerant instance"
