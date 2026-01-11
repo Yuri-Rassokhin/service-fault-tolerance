@@ -125,7 +125,7 @@ resource "oci_core_instance" "node1" {
       {
         node_name           = "ha-node-1"
         peer_node_name      = "ha-node-2"
-        region              = var.region
+        region              = local.region
         subnet_ocid         = var.subnet_ocid
         fs_type             = var.fs_type
         mount_point         = var.mount_point
@@ -171,7 +171,7 @@ resource "oci_core_instance" "node2" {
       {
         node_name           = "ha-node-2"
         peer_node_name      = "ha-node-1"
-        region              = var.region
+        region              = local.region
         subnet_ocid         = var.subnet_ocid
         fs_type             = var.fs_type
         mount_point         = var.mount_point
