@@ -31,22 +31,6 @@ variable "subnet_ocid" {
   }
 }
 
-validation {
-  condition     = data.oci_core_subnet.selected.vcn_id == var.vcn_ocid
-  error_message = "Subnet does not belong to the selected VCN"
-}
-
-validation {
-  condition = (
-    var.cross_ad_fault_tolerance == false ||
-    (
-      var.cross_ad_fault_tolerance == true &&
-      local.subnet_ad != null
-    )
-  )
-  error_message = "Cross-AD mode requires subnets explicitly bound to an Availability Domain"
-}
-
 variable "ssh_public_key" {
   description = "SSH public key to access fault tolerant instance"
   type        = string

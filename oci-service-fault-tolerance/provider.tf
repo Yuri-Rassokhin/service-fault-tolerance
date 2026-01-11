@@ -9,8 +9,8 @@ terraform {
       version = ">= 3.0.0"
     }
   }
+  provider "oci" {
+    region = local.region
+  }
 }
 
-provider "oci" {
-  region = local.region
-}
