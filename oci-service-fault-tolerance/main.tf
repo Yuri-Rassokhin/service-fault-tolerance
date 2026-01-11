@@ -1,6 +1,7 @@
 
 data "oci_core_vcn" "selected" {
   vcn_id = var.vcn_ocid
+  region = var.region
 }
 
 data "oci_core_subnet" "selected" {
