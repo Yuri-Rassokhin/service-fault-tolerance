@@ -2,7 +2,7 @@ resource "null_resource" "validate_network" {
   lifecycle {
     precondition {
       condition     = local.vcn_region_ok
-      error_message = "Selected VCN does not belong to region ${var.region}"
+      error_message = "Selected VCN does not belong to region ${local.region}"
     }
 
     precondition {
