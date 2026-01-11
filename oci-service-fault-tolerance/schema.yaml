@@ -57,6 +57,7 @@ variables:
     default: false
 
   region_single_ad:
+    required: true
     type: enum
     title: OCI Region (All Regions)
     description: All public regions
@@ -150,6 +151,7 @@ variables:
       - USA (Chicago)
 
   region_multi_ad:
+    required: true
     type: enum
     title: OCI Region (Multi-AD only)
     enum:
