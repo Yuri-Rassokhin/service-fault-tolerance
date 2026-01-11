@@ -8,6 +8,6 @@ locals {
   subnet_in_vcn = data.oci_core_subnet.selected.vcn_id == var.vcn_ocid
 
   # Location
-  region = = var.cross_ad_fault_tolerance ? var.region_multi_ad : var.region_single_ad
+  region = var.cross_ad_fault_tolerance ? var.region_multi_ad : var.region_single_ad
 }
 
