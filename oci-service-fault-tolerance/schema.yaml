@@ -54,101 +54,104 @@ variables:
     type: boolean
     default: false
 
-  region_single_ad:
-    type: enum
-    title: OCI Region (All Regions)
-    enum:
-      - af-johannesburg-1
-      - ap-chuncheon-1
-      - ap-hyderabad-1
-      - ap-melbourne-1
-      - ap-mumbai-1
-      - ap-osaka-1
-      - ap-seoul-1
-      - ap-singapore-1
-      - ap-sydney-1
-      - ap-tokyo-1
-      - ca-montreal-1
-      - ca-toronto-1
-      - eu-amsterdam-1
-      - eu-frankfurt-1
-      - eu-madrid-1
-      - eu-marseille-1
-      - eu-milan-1
-      - eu-paris-1
-      - eu-stockholm-1
-      - eu-zurich-1
-      - il-jerusalem-1
-      - me-abudhabi-1
-      - me-dubai-1
-      - me-jeddah-1
-      - me-riyadh-1
-      - mx-monterrey-1
-      - mx-queretaro-1
-      - sa-santiago-1
-      - sa-valparaiso-1
-      - sa-saopaulo-1
-      - uk-london-1
-      - us-ashburn-1
-      - us-phoenix-1
-      - us-sanjose-1
-    enumNames:
-      - South Africa (Johannesburg) – 1 AD
-      - South Korea (Chuncheon) – 1 AD
-      - India (Hyderabad) – 1 AD
-      - Australia (Melbourne) – 1 AD
-      - India (Mumbai) – 1 AD
-      - Japan (Osaka) – 1 AD
-      - South Korea (Seoul) – 1 AD
-      - Singapore (Singapore) – 3 AD
-      - Australia (Sydney) – 3 AD
-      - Japan (Tokyo) – 3 AD
-      - Canada (Montreal) – 1 AD
-      - Canada (Toronto) – 1 AD
-      - Netherlands (Amsterdam) – 1 AD
-      - Germany (Frankfurt) – 3 AD
-      - Spain (Madrid) – 1 AD
-      - France (Marseille) – 1 AD
-      - Italy (Milan) – 1 AD
-      - France (Paris) – 1 AD
-      - Sweden (Stockholm) – 1 AD
-      - Switzerland (Zurich) – 1 AD
-      - Israel (Jerusalem) – 1 AD
-      - UAE (Abu Dhabi) – 1 AD
-      - UAE (Dubai) – 3 AD
-      - Saudi Arabia (Jeddah) – 1 AD
-      - Saudi Arabia (Riyadh) – 1 AD
-      - Mexico (Monterrey) – 1 AD
-      - Mexico (Queretaro) – 1 AD
-      - Chile (Santiago) – 1 AD
-      - Chile (Valparaiso) – 1 AD
-      - Brazil (Sao Paulo) – 1 AD
-      - United Kingdom (London) – 3 AD
-      - USA (Ashburn) – 3 AD
-      - USA (Phoenix) – 3 AD
-      - USA (San Jose) – 1 AD
+region_single_ad:
+  type: enum
+  title: OCI Region (Single AD)
+  description: Public regions with 1 Availability Domain
+  enum:
+    - af-johannesburg-1
+    - ap-batam-1
+    - ap-chuncheon-1
+    - ap-hyderabad-1
+    - ap-melbourne-1
+    - ap-mumbai-1
+    - ap-osaka-1
+    - ap-seoul-1
+    - ap-singapore-1
+    - ap-singapore-2
+    - ap-sydney-1
+    - ap-tokyo-1
+    - ca-montreal-1
+    - ca-toronto-1
+    - eu-amsterdam-1
+    - eu-jovanovac-1
+    - eu-madrid-1
+    - eu-madrid-3
+    - eu-marseille-1
+    - eu-milan-1
+    - eu-paris-1
+    - eu-stockholm-1
+    - eu-turin-1
+    - eu-zurich-1
+    - il-jerusalem-1
+    - me-abudhabi-1
+    - me-dubai-1
+    - me-jeddah-1
+    - me-riyadh-1
+    - mx-monterrey-1
+    - mx-queretaro-1
+    - sa-bogota-1
+    - sa-santiago-1
+    - sa-saopaulo-1
+    - sa-valparaiso-1
+    - sa-vinhedo-1
+    - uk-cardiff-1
+    - us-sanjose-1
+  enumNames:
+    - South Africa (Johannesburg)
+    - Indonesia (Batam)
+    - South Korea (Chuncheon)
+    - India (Hyderabad)
+    - Australia (Melbourne)
+    - India (Mumbai)
+    - Japan (Osaka)
+    - South Korea (Seoul)
+    - Singapore (Singapore)
+    - Singapore (Singapore West)
+    - Australia (Sydney)
+    - Japan (Tokyo)
+    - Canada (Montreal)
+    - Canada (Toronto)
+    - Netherlands (Amsterdam)
+    - Serbia (Jovanovac)
+    - Spain (Madrid)
+    - Spain (Madrid 3)
+    - France (Marseille)
+    - Italy (Milan)
+    - France (Paris)
+    - Sweden (Stockholm)
+    - Italy (Turin)
+    - Switzerland (Zurich)
+    - Israel (Jerusalem)
+    - UAE (Abu Dhabi)
+    - UAE (Dubai)
+    - Saudi Arabia (Jeddah)
+    - Saudi Arabia (Riyadh)
+    - Mexico (Monterrey)
+    - Mexico (Queretaro)
+    - Colombia (Bogota)
+    - Chile (Santiago)
+    - Brazil (Sao Paulo)
+    - Chile (Valparaiso)
+    - Brazil (Vinhedo)
+    - United Kingdom (Newport)
+    - USA (San Jose)
 
   region_multi_ad:
     type: enum
-    title: OCI Region (Three-AD only)
+    title: OCI Region (Multi-AD only)
     enum:
-      - ap-singapore-1
-      - ap-sydney-1
-      - ap-tokyo-1
       - eu-frankfurt-1
-      - me-dubai-1
       - uk-london-1
       - us-ashburn-1
       - us-phoenix-1
+      - us-chicago-1
     enumNames:
-      - Singapore (Singapore) – 3 AD
-      - Australia (Sydney) – 3 AD
-      - Japan (Tokyo) – 3 AD
-      - Germany (Frankfurt) – 3 AD
-      - UAE (Dubai) – 3 AD
-      - United Kingdom (London) – 3 AD
-      - USA (Ashburn) – 3 AD
-      - USA (Phoenix) – 3 AD
+      - Germany (Frankfurt)
+      - United Kingdom (London)
+      - USA (Ashburn)
+      - USA (Phoenix)
+      - USA (Chicago)
 
   tenancy_ocid:
     title: "Tenancy"
