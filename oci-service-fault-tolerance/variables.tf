@@ -56,15 +56,6 @@ variable "ssh_public_key" {
   }
 }
 
-variable "region" {
-  type        = string
-  description = "OCI region code"
-  validation {
-    condition = length(trimspace(var.region)) > 0
-    error_message = "OCI region is required"
-  }
-}
-
 variable "shape" {
   type    = string
   default = "VM.Standard.E5.Flex"

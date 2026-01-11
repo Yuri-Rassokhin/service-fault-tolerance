@@ -12,5 +12,5 @@ terraform {
 }
 
 provider "oci" {
-  region = var.region
+  region = local.region
 }
