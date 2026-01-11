@@ -12,6 +12,7 @@ variableGroups:
       - cross_ad_fault_tolerance
 
   - title: "Region Selection"
+    required: true
     visible:
       not:
         - cross_ad_fault_tolerance
@@ -19,6 +20,7 @@ variableGroups:
       - region_single_ad
 
   - title: "Region Selection"
+    required: true
     visible: cross_ad_fault_tolerance
     variables:
       - region_multi_ad
@@ -55,7 +57,7 @@ variables:
     default: false
 
   region_single_ad:
-    type: string
+    type: enum
     title: OCI Region (All Regions)
     description: All public regions
     enum:
@@ -148,7 +150,7 @@ variables:
       - USA (Chicago)
 
   region_multi_ad:
-    type: string
+    type: enum
     title: OCI Region (Multi-AD only)
     enum:
       - eu-frankfurt-1
