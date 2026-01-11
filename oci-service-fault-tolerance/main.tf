@@ -13,8 +13,7 @@ data "oci_identity_availability_domains" "ads" {
 
 locals {
   ad_names = [
-    for ad in data.oci_identity_availability_domains.ads.availability_domains :
-    ad.name
+    for ad in data.oci_identity_availability_domains.ads.availability_domains : ad.name
   ]
   ad_count = length(local.ad_names)
 }
