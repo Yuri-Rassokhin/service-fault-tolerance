@@ -11,12 +11,3 @@ locals {
   subnet_in_vcn = data.oci_core_subnet.selected.vcn_id == var.vcn_ocid
 }
 
-locals {
-  _validate_region = (
-    var.cross_ad_fault_tolerance && var.region_multi_ad == null
-  ) ? error("cross_ad_fault_tolerance=true requires region_multi_ad") :
-    (!var.cross_ad_fault_tolerance && var.region_single_ad == null)
-  ? error("cross_ad_fault_tolerance=false requires region_single_ad")
-  : true
-}
-
