@@ -55,7 +55,7 @@ variables:
     default: false
 
   region_single_ad:
-    type: enum
+    type: string
     title: OCI Region (All Regions)
     description: All public regions
     enum:
@@ -148,7 +148,7 @@ variables:
       - USA (Chicago)
 
   region_multi_ad:
-    type: enum
+    type: string
     title: OCI Region (Multi-AD only)
     enum:
       - eu-frankfurt-1
