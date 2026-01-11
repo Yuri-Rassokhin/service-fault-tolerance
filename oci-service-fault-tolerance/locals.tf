@@ -14,19 +14,11 @@ locals {
   subnet_in_vcn = data.oci_core_subnet.selected.vcn_id == var.vcn_ocid
 
   # Guards
-  _validate_region = (
-    var.cross_ad_fault_tolerance && var.region_multi_ad == null
-  ) ? error("cross_ad_fault_tolerance=true requires region_multi_ad") :
-    (!var.cross_ad_fault_tolerance && var.region_single_ad == null)
-  ? error("cross_ad_fault_tolerance=false requires region_single_ad")
-  : true
+  _validate_region = (var.cross_ad_fault_tolerance && var.region_multi_ad == null) ? error("cross_ad_fault_tolerance=true requires region_multi_ad") : (!var.cross_ad_fault_tolerance && var.region_single_ad == null) ? error("cross_ad_fault_tolerance=false requires region_single_ad") : true
 
-  _validate_vcn_region = local.vcn_region_ok
-    ? true
-    : error("VCN ${var.vcn_ocid} does not belong to region ${local.region}")
+  _validate_vcn_region = local.vcn_region_ok ? true : error("VCN ${var.vcn_ocid} does not belong to region ${local.region}")
 
-  _validate_subnet_vcn = local.subnet_in_vcn
-    ? true
-    : error("Subnet ${var.subnet_ocid} does not belong to VCN ${var.vcn_ocid}")
+  _validate_subnet_vcn = local.subnet_in_vcn ? true : error("Subnet ${var.subnet_ocid} does not belong to VCN ${var.vcn_ocid}")
+
 }
 
