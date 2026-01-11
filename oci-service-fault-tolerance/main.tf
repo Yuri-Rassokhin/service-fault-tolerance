@@ -82,14 +82,14 @@ locals {
 }
 
 resource "oci_core_volume" "drbd_volume_1" {
-  availability_domain = local.availability_domain
+  availability_domain = local.ad_primary
   compartment_id      = var.compartment_ocid
   size_in_gbs         = var.block_volume_size_gbs
   display_name        = "drbd-volume-1"
 }
 
 resource "oci_core_volume" "drbd_volume_2" {
-  availability_domain = local.availability_domain
+  availability_domain = local.ad_secondary
   compartment_id      = var.compartment_ocid
   size_in_gbs         = var.block_volume_size_gbs
   display_name        = "drbd-volume-2"
