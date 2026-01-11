@@ -1,9 +1,3 @@
-### REQUIRED ###
-
-variable "region" {
-  type        = string
-  description = "OCI region code"
-}
 
 variable "cross_ad_fault_tolerance" {
   type        = bool
@@ -23,38 +17,18 @@ variable "vcn_ocid" {
   description = "VCN where fault-tolerant cluster will be deployed"
   type        = string
   validation {
-    condition = length(trimspace(var.vcn_ocid)) > 0
-    error_message = "VCN OCID is required"
+    condition     = can(regex("^ocid1.vcn\\.", var.vcn_ocid))
+    error_message = "vcn_ocid must be a valid VCN OCID"
   }
-  pattern: "^ocid1.vcn\\..+"
-
-}
-
-data "oci_core_vcn" "selected" {
-  vcn_id = var.vcn_ocid
-}
-
-locals {
-  vcn_region = data.oci_core_vcn.selected.region
-}
-
-validation {
-  condition     = local.vcn_region == var.region
-  error_message = "Selected VCN does not belong to the chosen region (${var.region})"
 }
 
 variable "subnet_ocid" {
   description = "Subnet where fault-tolerant cluster will be deployed"
   type        = string
   validation {
-    condition = length(trimspace(var.subnet_ocid)) > 0
-    error_message = "Subnet OCID is required"
+    condition     = can(regex("^ocid1.subnet\\.", var.subnet_ocid))
+    error_message = "subnet_ocid must be a valid Subnet OCID"
   }
-  pattern: "^ocid1.subnet\\..+"
-}
-
-data "oci_core_subnet" "selected" {
-  subnet_id = var.subnet_ocid
 }
 
 validation {
@@ -73,8 +47,6 @@ validation {
   error_message = "Cross-AD mode requires subnets explicitly bound to an Availability Domain"
 }
 
-
-
 variable "ssh_public_key" {
   description = "SSH public key to access fault tolerant instance"
   type        = string
@@ -86,13 +58,12 @@ variable "ssh_public_key" {
 
 variable "region" {
   type        = string
+  description = "OCI region code"
   validation {
     condition = length(trimspace(var.region)) > 0
     error_message = "OCI region is required"
   }
 }
-
-### COMPUTE ###
 
 variable "shape" {
   type    = string
@@ -118,8 +89,6 @@ variable "memory_gbs" {
   type    = number
   default = 16
 }
-
-### STORAGE / HA ###
 
 variable "block_volume_size_gbs" {
   type    = number

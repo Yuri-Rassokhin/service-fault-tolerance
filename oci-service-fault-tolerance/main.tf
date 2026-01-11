@@ -1,13 +1,14 @@
-############################
-# Availability Domain
-############################
+
+data "oci_core_vcn" "selected" {
+  vcn_id = var.vcn_ocid
+}
+
+data "oci_core_subnet" "selected" {
+  subnet_id = var.subnet_ocid
+}
 
 data "oci_identity_availability_domains" "ads" {
   compartment_id = var.compartment_ocid
-}
-
-locals {
-  availability_domain = data.oci_identity_availability_domains.ads.availability_domains[0].name
 }
 
 locals {
@@ -26,10 +27,6 @@ resource "null_resource" "validate_ad_count" {
     }
   }
 }
-
-############################
-# Operating System Image
-############################
 
 data "oci_core_images" "oracle_linux_all" {
   compartment_id           = var.compartment_ocid
@@ -85,10 +82,6 @@ locals {
   image_name = local.oracle_linux_latest.display_name
 }
 
-############################
-# Block Volumes
-############################
-
 resource "oci_core_volume" "drbd_volume_1" {
   availability_domain = local.availability_domain
   compartment_id      = var.compartment_ocid
@@ -103,12 +96,8 @@ resource "oci_core_volume" "drbd_volume_2" {
   display_name        = "drbd-volume-2"
 }
 
-############################
-# Compute Instance: Node 1
-############################
-
 resource "oci_core_instance" "node1" {
-  availability_domain = local.availability_domain
+  availability_domain = local.ad_primary
   compartment_id      = var.compartment_ocid
   shape               = var.shape
   display_name        = "ha-node-1"
@@ -153,12 +142,8 @@ resource "oci_core_instance" "node1" {
   }
 }
 
-############################
-# Compute Instance: Node 2
-############################
-
 resource "oci_core_instance" "node2" {
-  availability_domain = local.availability_domain
+  availability_domain = local.ad_secondary
   compartment_id      = var.compartment_ocid
   shape               = var.shape
   display_name        = "ha-node-2"
@@ -202,10 +187,6 @@ resource "oci_core_instance" "node2" {
     ))
   }
 }
-
-############################
-# Volume Attachments
-############################
 
 resource "oci_core_volume_attachment" "attach1" {
   instance_id     = oci_core_instance.node1.id
