@@ -71,7 +71,7 @@ variable "block_volume_size_gbs" {
 }
 
 variable "region_multi_ad" {
-  type - string
+  type = string
 }
 
 variable "region_single_ad" {
