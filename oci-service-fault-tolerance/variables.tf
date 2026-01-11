@@ -70,6 +70,14 @@ variable "block_volume_size_gbs" {
   default = 200
 }
 
+variable "region_multi_ad" {
+  type - string
+}
+
+variable "region_single_ad" {
+  type = string
+}
+
 variable "mount_point" {
   type    = string
   default = "/resilient"
