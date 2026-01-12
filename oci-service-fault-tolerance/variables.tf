@@ -70,6 +70,8 @@ variable "block_volume_size_gbs" {
   default = 200
 }
 
+variable "region" { }
+
 variable "region_multi_ad" {
   type = string
   default = ""
