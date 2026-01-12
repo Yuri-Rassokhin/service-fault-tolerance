@@ -11,13 +11,6 @@ data "oci_identity_availability_domains" "ads" {
   compartment_id = var.compartment_ocid
 }
 
-locals {
-  ad_names = [
-    for ad in data.oci_identity_availability_domains.ads.availability_domains : ad.name
-  ]
-  ad_count = length(local.ad_names)
-}
-
 resource "null_resource" "validate_ad_count" {
   lifecycle {
     precondition {
