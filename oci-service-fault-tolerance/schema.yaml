@@ -11,6 +11,11 @@ variableGroups:
     variables:
       - cross_ad_fault_tolerance
 
+  - title: "Region"
+    visible: false
+    variables:
+      - region
+
   - title: "Region Selection"
     required: true
     visible:
