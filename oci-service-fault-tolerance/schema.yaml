@@ -1,5 +1,5 @@
-title: "Fault Tolerant Compute Resource on OCI"
-description: "Fault tolerant compute instance with strictly POSIX-compliant local storage and HTTP access"
+title: "Fault Tolerance on OCI"
+description: "Fault tolerant service that provides compute instance, local filesystem, HTTP and DNS with synchronous stateful replication and 10 seconds switchover"
 
 schemaVersion: 1.1.0
 
