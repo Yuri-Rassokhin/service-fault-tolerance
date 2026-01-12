@@ -65,7 +65,6 @@ variables:
     required: true
     type: enum
     title: OCI Region (All Regions)
-    description: All public regions
     enum:
       - af-johannesburg-1
       - ap-batam-1
