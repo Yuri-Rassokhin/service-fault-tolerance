@@ -1,3 +1,15 @@
+output "service_hostname" {
+  value = var.service_hostname
+}
+
+output "service_ip" {
+  value = local.service_ip
+}
+
+output "resilient_mount_point" {
+  value = var.mount_point
+}
+
 output "region" {
   value = local.region
 }

@@ -43,7 +43,3 @@ resource "oci_core_private_ip" "service_ip" {
   ip_address = local.service_ip
 }
 
-output "service_ip" {
-  value = local.service_ip
-}
-
