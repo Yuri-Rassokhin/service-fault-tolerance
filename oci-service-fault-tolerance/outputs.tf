@@ -11,7 +11,7 @@ output "node1_availability_domain" {
 }
 
 output "node1_fault_tolerant_volume" {
-  value = oci_core_volume.drbd_volume_1.id,
+  value = oci_core_volume.drbd_volume_1.id
 }
 
 output "node2_private_ip" {
@@ -23,7 +23,7 @@ output "node2_availability_domain" {
 }
 
 output "node2_fault_tolerant_volume" {
-  value = oci_core_volume.drbd_volume_2.id,
+  value = oci_core_volume.drbd_volume_2.id
 }
 
 output "operating_system_name" {
