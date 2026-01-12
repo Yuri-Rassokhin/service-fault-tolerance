@@ -11,6 +11,6 @@ terraform {
   }
 }
 
-provider "oci" {
-  region = local.region
-}
+#provider "oci" {
+#  region = local.region
+#}
