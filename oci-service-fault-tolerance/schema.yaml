@@ -105,50 +105,7 @@ variables:
       - us-ashburn-1
       - us-phoenix-1
       - us-chicago-1
-    enumNames:
-      - South Africa (Johannesburg)
-      - Indonesia (Batam)
-      - South Korea (Chuncheon)
-      - India (Hyderabad)
-      - Australia (Melbourne)
-      - India (Mumbai)
-      - Japan (Osaka)
-      - South Korea (Seoul)
-      - Singapore (Singapore)
-      - Singapore (Singapore West)
-      - Australia (Sydney)
-      - Japan (Tokyo)
-      - Canada (Montreal)
-      - Canada (Toronto)
-      - Netherlands (Amsterdam)
-      - Serbia (Jovanovac)
-      - Spain (Madrid)
-      - Spain (Madrid 3)
-      - France (Marseille)
-      - Italy (Milan)
-      - France (Paris)
-      - Sweden (Stockholm)
-      - Italy (Turin)
-      - Switzerland (Zurich)
-      - Israel (Jerusalem)
-      - UAE (Abu Dhabi)
-      - UAE (Dubai)
-      - Saudi Arabia (Jeddah)
-      - Saudi Arabia (Riyadh)
-      - Mexico (Monterrey)
-      - Mexico (Queretaro)
-      - Colombia (Bogota)
-      - Chile (Santiago)
-      - Brazil (Sao Paulo)
-      - Chile (Valparaiso)
-      - Brazil (Vinhedo)
-      - United Kingdom (Newport)
-      - USA (San Jose)
-      - Germany (Frankfurt)
-      - United Kingdom (London)
-      - USA (Ashburn)
-      - USA (Phoenix)
-      - USA (Chicago)
+    default: me-dubai-1
 
   region_multi_ad:
     required: true
@@ -160,12 +117,7 @@ variables:
       - us-ashburn-1
       - us-phoenix-1
       - us-chicago-1
-    enumNames:
-      - Germany (Frankfurt)
-      - United Kingdom (London)
-      - USA (Ashburn)
-      - USA (Phoenix)
-      - USA (Chicago)
+    default: eu-frankfurt-1
 
   tenancy_ocid:
     title: "Tenancy"
