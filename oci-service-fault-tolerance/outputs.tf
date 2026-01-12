@@ -1,23 +1,37 @@
+output "region" {
+  value = local.region
+}
+
 output "node1_private_ip" {
   value = oci_core_instance.node1.private_ip
+}
+
+output "node1_availability_domain" {
+  value = local.ad_primary
+}
+
+output "node1_fault_tolerant_volume" {
+  value = oci_core_volume.drbd_volume_1.id,
 }
 
 output "node2_private_ip" {
   value = oci_core_instance.node2.private_ip
 }
 
-output "block_volume_ids" {
-  value = [
-    oci_core_volume.drbd_volume_1.id,
-    oci_core_volume.drbd_volume_2.id
-  ]
+output "node2_availability_domain" {
+  value = local.ad_secondary
 }
 
-output "selected_image" {
-  value = {
-    name = local.image_name
-    ocid = local.image_ocid
-  }
+output "node2_fault_tolerant_volume" {
+  value = oci_core_volume.drbd_volume_2.id,
+}
+
+output "operating_system_name" {
+  value = local.image_name
+}
+
+output "operating_system_image" {
+  value = local.image_ocid
 }
 
 output "oracle_linux_debug" {
