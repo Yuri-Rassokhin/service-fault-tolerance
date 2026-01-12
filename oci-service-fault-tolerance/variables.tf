@@ -72,12 +72,12 @@ variable "block_volume_size_gbs" {
 
 variable "region_multi_ad" {
   type = string
-  default = null
+  default = ""
 }
 
 variable "region_single_ad" {
   type = string
-  default = null
+  default = ""
 }
 
 variable "mount_point" {

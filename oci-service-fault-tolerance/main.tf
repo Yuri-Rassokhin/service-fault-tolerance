@@ -11,15 +11,6 @@ data "oci_identity_availability_domains" "ads" {
   compartment_id = var.compartment_ocid
 }
 
-resource "null_resource" "validate_ad_count" {
-  lifecycle {
-    precondition {
-      condition     = !var.cross_ad_fault_tolerance || local.ad_count >= 2
-      error_message = "Cross-AD Fault Tolerance requires at least 2 Availability Domains in the selected region"
-    }
-  }
-}
-
 data "oci_core_images" "oracle_linux_all" {
   compartment_id           = var.compartment_ocid
   operating_system         = "Oracle Linux"
