@@ -1,5 +1,5 @@
 output "service_hostname" {
-  value = var.service_hostname
+  value = format("%s.%S", var.service_hostname, local.resilient_zone_name)
 }
 
 output "service_ip" {
