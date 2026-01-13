@@ -46,6 +46,7 @@ variableGroups:
   - title: "Fault Tolerant Storage"
     variables:
       - block_volume_size_gbs
+      - block_volume_vpu
       - fs_type
       - mount_point
 
@@ -157,6 +158,19 @@ variables:
 
   block_volume_size_gbs:
     title: "Raw Size (GB)"
+
+  block_volume_vpu:
+    title: Effective Performance (VPU)
+    description: "VPU level for writing in user workloads. Please note that VPU for reading will be ~2x higher"
+    type: enum
+    enum:
+      - 0
+      - 10
+      - 20
+      - 30
+      - 40
+      - 50
+    default: 10
 
   fs_type:
     title: "Filesystem"

@@ -62,12 +62,17 @@ variable "ocpus" {
 
 variable "memory_gbs" {
   type    = number
-  default = 16
+  default = 8
 }
 
 variable "block_volume_size_gbs" {
   type    = number
   default = 200
+}
+
+variable "block_volume_vpu" {
+  type    = number
+  default = 10
 }
 
 variable "region" { }
