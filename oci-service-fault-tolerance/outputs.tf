@@ -22,8 +22,16 @@ output "node1_availability_domain" {
   value = local.ad_primary
 }
 
-output "node1_fault_tolerant_volume" {
+output "node1_volume" {
   value = oci_core_volume.drbd_volume_1.id
+}
+
+output "node1_volume_size" {
+  value = var.block_volume_size_gbs
+}
+
+output "node1_volume_true_vpu" {
+  value = local.true_block_volume_vpu
 }
 
 output "node2_private_ip" {
@@ -34,8 +42,16 @@ output "node2_availability_domain" {
   value = local.ad_secondary
 }
 
-output "node2_fault_tolerant_volume" {
+output "node2_volume" {
   value = oci_core_volume.drbd_volume_2.id
+}
+
+output "node2_volume_size" {
+  value = var.block_volume_size_gbs
+}
+
+output "node2_volume_true_vpu" {
+  value = local.true_block_volume_vpu
 }
 
 output "operating_system_name" {
