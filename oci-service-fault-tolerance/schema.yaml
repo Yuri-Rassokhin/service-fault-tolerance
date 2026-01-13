@@ -160,23 +160,17 @@ variables:
     title: "Raw Size (GB)"
 
   block_volume_vpu:
-  title: Effective Performance (VPU)
-  description: "VPU level for writing in user workloads. Please note that VPU for reading will be ~2x higher"
-  type: string
-  default: "10"
-  oneOf:
-    - title: "0 - Low Cost"
-      const: "0"
-    - title: "10 - Default"
-      const: "10"
-    - title: "20 - Value"
-      const: "20"
-    - title: "30 - Performance"
-      const: "30"
-    - title: "40 - Higher Performance"
-      const: "40"
-    - title: "50 - Ultra Performance"
-      const: "50"
+    title: Effective Performance (VPU)
+    description: "VPU level for writing in user workloads. Please note that VPU for reading will be ~2x higher"
+    type: enum
+    enum:
+      - 0
+      - 10
+      - 20
+      - 30
+      - 40
+      - 50
+    default: 10
 
   fs_type:
     title: "Filesystem"
